@@ -4,12 +4,8 @@ import { anyone } from '../access/anyone'
 import { isEditorOrAdmin } from '../access/isEditorOrAdmin'
 import { slugField } from 'payload'
 
-// Note: the `parent` (self-relationship) and `breadcrumbs` fields are
-// added automatically by @payloadcms/plugin-nested-docs (see plugins/index.ts),
-// satisfying CLAUDE.md's "parent (self-rel, optional)" requirement without
-// hand-rolling it here.
-export const Categories: CollectionConfig = {
-  slug: 'categories',
+export const Tags: CollectionConfig = {
+  slug: 'tags',
   access: {
     create: isEditorOrAdmin,
     delete: isEditorOrAdmin,

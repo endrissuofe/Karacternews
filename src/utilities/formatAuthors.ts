@@ -1,18 +1,15 @@
-import { Post } from '@/payload-types'
+import { User } from '@/payload-types'
 
 /**
- * Formats an array of populatedAuthors from Posts into a prettified string.
- * @param authors - The populatedAuthors array from a Post.
- * @returns A prettified string of authors.
+ * Formats an array of authors into a prettified string. Articles currently
+ * have a single `author`, but this stays array-capable for future reuse.
  * @example
  *
  * [Author1, Author2] becomes 'Author1 and Author2'
  * [Author1, Author2, Author3] becomes 'Author1, Author2, and Author3'
  *
  */
-export const formatAuthors = (
-  authors: NonNullable<NonNullable<Post['populatedAuthors']>[number]>[],
-) => {
+export const formatAuthors = (authors: Pick<User, 'name'>[]) => {
   // Ensure we don't have any authors without a name
   const authorNames = authors.map((author) => author.name).filter(Boolean)
 

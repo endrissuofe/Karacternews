@@ -27,7 +27,7 @@ export const Media: CollectionConfig = {
     {
       name: 'alt',
       type: 'text',
-      //required: true,
+      required: true,
     },
     {
       name: 'caption',
@@ -48,33 +48,40 @@ export const Media: CollectionConfig = {
       {
         name: 'thumbnail',
         width: 300,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'square',
         width: 500,
         height: 500,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'small',
         width: 600,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'medium',
         width: 900,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'large',
         width: 1400,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'xlarge',
         width: 1920,
+        formatOptions: { format: 'webp' },
       },
       {
         name: 'og',
         width: 1200,
         height: 630,
         crop: 'center',
+        formatOptions: { format: 'webp' },
       },
     ],
   },

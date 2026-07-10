@@ -2,32 +2,32 @@
 import { cn } from '@/utilities/ui'
 import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
-import React, { Fragment } from 'react'
+import React from 'react'
 
-import type { Post } from '@/payload-types'
+import type { Article } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 
-export type CardPostData = Pick<Post, 'slug' | 'categories' | 'meta' | 'title'>
+export type CardPostData = Pick<Article, 'slug' | 'category' | 'seo' | 'title' | 'excerpt'>
 
 export const Card: React.FC<{
   alignItems?: 'center'
   className?: string
   doc?: CardPostData
-  relationTo?: 'posts'
+  relationTo?: 'articles'
   showCategories?: boolean
   title?: string
 }> = (props) => {
   const { card, link } = useClickableCard({})
-  const { className, doc, relationTo, showCategories, title: titleFromProps } = props
+  const { className, doc, showCategories, title: titleFromProps } = props
 
-  const { slug, categories, meta, title } = doc || {}
-  const { description, image: metaImage } = meta || {}
+  const { slug, category, seo, title, excerpt } = doc || {}
+  const { description, image: metaImage } = seo || {}
 
-  const hasCategories = categories && Array.isArray(categories) && categories.length > 0
+  const hasCategory = category && typeof category === 'object'
   const titleToUse = titleFromProps || title
-  const sanitizedDescription = description?.replace(/\s/g, ' ') // replace non-breaking space with white space
-  const href = `/${relationTo}/${slug}`
+  const descriptionToUse = (description || excerpt)?.replace(/\s/g, ' ')
+  const href = `/article/${slug}`
 
   return (
     <article
@@ -42,26 +42,9 @@ export const Card: React.FC<{
         {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
       </div>
       <div className="p-4">
-        {showCategories && hasCategories && (
+        {showCategories && hasCategory && (
           <div className="uppercase text-sm mb-4">
-            {categories?.map((category, index) => {
-              if (typeof category === 'object') {
-                const { title: titleFromCategory } = category
-
-                const categoryTitle = titleFromCategory || 'Untitled category'
-
-                const isLast = index === categories.length - 1
-
-                return (
-                  <Fragment key={index}>
-                    {categoryTitle}
-                    {!isLast && <Fragment>, &nbsp;</Fragment>}
-                  </Fragment>
-                )
-              }
-
-              return null
-            })}
+            {typeof category === 'object' ? category.name || 'Untitled category' : ''}
           </div>
         )}
         {titleToUse && (
@@ -73,7 +56,11 @@ export const Card: React.FC<{
             </h3>
           </div>
         )}
-        {description && <div className="mt-2">{description && <p>{sanitizedDescription}</p>}</div>}
+        {descriptionToUse && (
+          <div className="mt-2">
+            <p>{descriptionToUse}</p>
+          </div>
+        )}
       </div>
     </article>
   )
