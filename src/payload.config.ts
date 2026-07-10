@@ -63,6 +63,11 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Increment 1 close-out: schema is stable now, so we stop using
+    // dev-mode push and switch to reviewed migrations (CLAUDE.md §3.5 —
+    // never mix push with migrations against the same database).
+    push: false,
+    migrationDir: './src/migrations',
   }),
   collections: [Pages, Articles, Media, Categories, Tags, Users],
   cors: [getServerSideURL()].filter(Boolean),
