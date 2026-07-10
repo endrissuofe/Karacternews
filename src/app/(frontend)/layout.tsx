@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 
 import { cn } from '@/utilities/ui'
-import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
+import { IBM_Plex_Mono, Oswald, Source_Serif_4 } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -16,11 +15,36 @@ import { draftMode } from 'next/headers'
 import './globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
 
+const oswald = Oswald({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-oswald',
+  weight: ['500', '600', '700'],
+})
+
+const sourceSerif = Source_Serif_4({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-source-serif',
+  weight: ['400', '600'],
+})
+
+const plexMono = IBM_Plex_Mono({
+  display: 'swap',
+  subsets: ['latin'],
+  variable: '--font-plex-mono',
+  weight: ['500', '600'],
+})
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html
+      className={cn(oswald.variable, sourceSerif.variable, plexMono.variable)}
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />

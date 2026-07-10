@@ -51,10 +51,14 @@ export default async function CategoryPage({
   })
 
   return (
-    <main className="pt-16 pb-24">
-      <div className="container mb-10">
-        <h1 className="text-3xl md:text-5xl font-bold">{category.name}</h1>
-        <p className="text-sm mt-2 opacity-70">{articles.totalDocs} article(s)</p>
+    <main className="pb-16 pt-8">
+      <div className="container mb-8">
+        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
+          {category.name}
+        </h1>
+        <p className="mt-2 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+          {articles.totalDocs} {articles.totalDocs === 1 ? 'story' : 'stories'}
+        </p>
       </div>
 
       {articles.docs.length > 0 ? (
@@ -64,14 +68,20 @@ export default async function CategoryPage({
       )}
 
       {articles.totalPages > 1 && (
-        <div className="container mt-10 flex gap-4">
+        <div className="container mt-10 flex gap-6">
           {page > 1 && (
-            <Link href={`/category/${slug}?page=${page - 1}`} className="underline">
+            <Link
+              href={`/category/${slug}?page=${page - 1}`}
+              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
+            >
               ← Previous
             </Link>
           )}
           {page < articles.totalPages && (
-            <Link href={`/category/${slug}?page=${page + 1}`} className="underline">
+            <Link
+              href={`/category/${slug}?page=${page + 1}`}
+              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
+            >
               Next →
             </Link>
           )}

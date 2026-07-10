@@ -59,16 +59,20 @@ export default async function AuthorPage({ params: paramsPromise }: Args) {
   })
 
   return (
-    <main className="pt-16 pb-24">
-      <div className="container mb-10 flex items-center gap-4">
+    <main className="pb-16 pt-8">
+      <div className="container mb-8 flex items-center gap-4">
         {author.avatar && typeof author.avatar === 'object' && (
-          <div className="w-16 h-16 rounded-full overflow-hidden">
-            <Media resource={author.avatar} />
+          <div className="relative h-16 w-16 flex-none overflow-hidden rounded-full bg-surface">
+            <Media fill imgClassName="object-cover" resource={author.avatar} size="64px" />
           </div>
         )}
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold">{author.name}</h1>
-          {author.bio && <p className="mt-2 max-w-2xl opacity-80">{author.bio}</p>}
+          <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
+            {author.name}
+          </h1>
+          {author.bio && (
+            <p className="mt-2 max-w-2xl font-serif text-sm text-muted-foreground">{author.bio}</p>
+          )}
         </div>
       </div>
 

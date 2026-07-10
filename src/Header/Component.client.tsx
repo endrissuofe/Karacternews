@@ -30,10 +30,13 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
   }, [headerTheme])
 
   return (
-    <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex justify-between">
-        <Link href="/">
-          <Logo loading="eager" priority="high" className="invert dark:invert-0" />
+    <header
+      className="relative z-20 border-b border-border bg-background"
+      {...(theme ? { 'data-theme': theme } : {})}
+    >
+      <div className="container flex items-center justify-between py-3.5">
+        <Link href="/" aria-label="Karacter News — home">
+          <Logo loading="eager" priority="high" />
         </Link>
         <HeaderNav data={data} />
       </div>

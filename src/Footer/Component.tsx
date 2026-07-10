@@ -12,19 +12,30 @@ export async function Footer() {
   const navItems = footerData?.navItems || []
 
   return (
-    <footer className="mt-auto border-t border-border bg-black dark:bg-card text-white">
-      <div className="container py-8 gap-8 flex flex-col md:flex-row md:justify-between">
+    <footer className="mt-auto bg-ink text-paper">
+      <div className="container flex flex-col gap-6 py-10">
         <Link className="flex items-center" href="/">
           <Logo />
         </Link>
 
-        <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
+        <nav className="flex flex-wrap gap-x-6 gap-y-3">
+          {navItems.map(({ link }, i) => {
+            return (
+              <CMSLink
+                className="font-mono text-[11px] font-semibold uppercase tracking-wider text-paper hover:text-amber"
+                key={i}
+                {...link}
+                appearance="inline"
+              />
+            )
+          })}
+        </nav>
+
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <p className="font-mono text-[10px] uppercase tracking-wider text-paper/60">
+            &copy; {new Date().getFullYear()} Karacter News. All rights reserved.
+          </p>
           <ThemeSelector />
-          <nav className="flex flex-col md:flex-row gap-4">
-            {navItems.map(({ link }, i) => {
-              return <CMSLink className="text-white" key={i} {...link} />
-            })}
-          </nav>
         </div>
       </div>
     </footer>

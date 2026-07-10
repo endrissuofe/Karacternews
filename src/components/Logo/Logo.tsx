@@ -14,16 +14,19 @@ export const Logo = (props: Props) => {
   const priority = priorityFromProps || 'low'
 
   return (
-    /* eslint-disable @next/next/no-img-element */
-    <img
-      alt="Payload Logo"
-      width={193}
-      height={34}
-      loading={loading}
-      fetchPriority={priority}
-      decoding="async"
-      className={clsx('max-w-[9.375rem] w-full h-[34px]', className)}
-      src="https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg"
-    />
+    <span className={clsx('flex items-center gap-2', className)}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        alt=""
+        width={24}
+        height={24}
+        loading={loading}
+        fetchPriority={priority}
+        decoding="async"
+        className="h-6 w-6 rounded-md"
+        src="/brand/karacter-monogram.svg"
+      />
+      <span className="font-display text-lg font-bold tracking-wide">KARACTER</span>
+    </span>
   )
 }

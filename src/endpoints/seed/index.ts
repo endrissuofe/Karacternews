@@ -4,6 +4,7 @@ import fs from 'fs'
 import path from 'path'
 
 import { richText } from './richText'
+import { toKebabCase } from '@/utilities/toKebabCase'
 
 const collectionsToClear: CollectionSlug[] = ['articles', 'categories', 'tags']
 
@@ -41,6 +42,7 @@ export const seed = async ({
     collection: 'users',
     data: {
       name: 'Amara Okafor',
+      slug: 'amara-okafor',
       email: 'author@example.com',
       password: 'password',
       role: 'author',
@@ -65,7 +67,7 @@ export const seed = async ({
     categoryNames.map((name) =>
       payload.create({
         collection: 'categories',
-        data: { name },
+        data: { name, slug: toKebabCase(name) },
       }),
     ),
   )
@@ -76,7 +78,7 @@ export const seed = async ({
     tagNames.map((name) =>
       payload.create({
         collection: 'tags',
-        data: { name },
+        data: { name, slug: toKebabCase(name) },
       }),
     ),
   )
@@ -148,6 +150,7 @@ export const seed = async ({
       context: { disableRevalidate: true },
       data: {
         title: articleData.title,
+        slug: toKebabCase(articleData.title),
         excerpt: articleData.excerpt,
         category: articleData.category,
         tags: articleData.tags,

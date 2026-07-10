@@ -7,8 +7,12 @@ import React from 'react'
 import type { Article } from '@/payload-types'
 
 import { Media } from '@/components/Media'
+import { timeAgo } from '@/utilities/formatDateTime'
 
-export type CardPostData = Pick<Article, 'slug' | 'category' | 'seo' | 'title' | 'excerpt'>
+export type CardPostData = Pick<
+  Article,
+  'slug' | 'category' | 'coverImage' | 'excerpt' | 'publishedAt' | 'seo' | 'title'
+>
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -21,47 +25,40 @@ export const Card: React.FC<{
   const { card, link } = useClickableCard({})
   const { className, doc, showCategories, title: titleFromProps } = props
 
-  const { slug, category, seo, title, excerpt } = doc || {}
-  const { description, image: metaImage } = seo || {}
+  const { slug, category, coverImage, publishedAt, seo, title } = doc || {}
 
   const hasCategory = category && typeof category === 'object'
   const titleToUse = titleFromProps || title
-  const descriptionToUse = (description || excerpt)?.replace(/\s/g, ' ')
+  const image =
+    (coverImage && typeof coverImage === 'object' ? coverImage : null) ||
+    (seo?.image && typeof seo.image === 'object' ? seo.image : null)
   const href = `/article/${slug}`
 
   return (
-    <article
-      className={cn(
-        'border border-border rounded-lg overflow-hidden bg-card hover:cursor-pointer',
-        className,
+    <article className={cn('group hover:cursor-pointer', className)} ref={card.ref}>
+      <div className="relative mb-2 aspect-[4/3] overflow-hidden rounded-[10px] bg-surface">
+        {image && <Media fill imgClassName="object-cover" resource={image} size="50vw" />}
+      </div>
+      {showCategories && hasCategory && (
+        <p className="mb-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-scarlet">
+          {category.name}
+        </p>
       )}
-      ref={card.ref}
-    >
-      <div className="relative w-full ">
-        {!metaImage && <div className="">No image</div>}
-        {metaImage && typeof metaImage !== 'string' && <Media resource={metaImage} size="33vw" />}
-      </div>
-      <div className="p-4">
-        {showCategories && hasCategory && (
-          <div className="uppercase text-sm mb-4">
-            {typeof category === 'object' ? category.name || 'Untitled category' : ''}
-          </div>
-        )}
-        {titleToUse && (
-          <div className="prose">
-            <h3>
-              <Link className="not-prose" href={href} ref={link.ref}>
-                {titleToUse}
-              </Link>
-            </h3>
-          </div>
-        )}
-        {descriptionToUse && (
-          <div className="mt-2">
-            <p>{descriptionToUse}</p>
-          </div>
-        )}
-      </div>
+      {titleToUse && (
+        <h3 className="font-display text-[15px] font-semibold leading-snug text-foreground group-hover:underline">
+          <Link href={href} ref={link.ref}>
+            {titleToUse}
+          </Link>
+        </h3>
+      )}
+      {publishedAt && (
+        <p
+          className="mt-1.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
+          suppressHydrationWarning
+        >
+          {timeAgo(publishedAt)}
+        </p>
+      )}
     </article>
   )
 }

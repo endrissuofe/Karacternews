@@ -14,7 +14,8 @@ import { slugField } from 'payload'
 export const Users: CollectionConfig = {
   slug: 'users',
   access: {
-    admin: isAdmin,
+    /* Payload's `admin` access must return a plain boolean (no query filters) */
+    admin: ({ req: { user } }) => Boolean(user && user.role === 'admin'),
     create: isAdmin,
     delete: isAdmin,
     read: isSelfOrAdmin,

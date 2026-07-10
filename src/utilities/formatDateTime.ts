@@ -18,3 +18,36 @@ export const formatDateTime = (timestamp: string): string => {
 
   return `${MM}/${DD}/${YYYY}`
 }
+
+const MONTHS_SHORT = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+]
+
+/* "12 Jul 2026" — rendered uppercase by the mono utility style */
+export const formatArticleDate = (timestamp: string): string => {
+  const date = new Date(timestamp)
+  return `${date.getDate()} ${MONTHS_SHORT[date.getMonth()]} ${date.getFullYear()}`
+}
+
+export const timeAgo = (timestamp: string): string => {
+  const diffMs = Date.now() - new Date(timestamp).getTime()
+  const mins = Math.floor(diffMs / 60000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins} min ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`
+  const days = Math.floor(hrs / 24)
+  if (days < 7) return `${days} ${days === 1 ? 'day' : 'days'} ago`
+  return formatArticleDate(timestamp)
+}
