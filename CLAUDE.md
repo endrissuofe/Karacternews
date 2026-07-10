@@ -3,6 +3,8 @@
 > **This file is the source of truth for building Karacter News Online.**
 > Any agent (Fable via Cowork or Claude Code) or human contributor must read this file **before writing any code** and must **not build outside what it defines**. If a task seems to require going beyond this file, **stop and ask** instead of guessing or expanding scope.
 
+> **Local reference:** the Payload CMS scaffold also bundled implementation reference docs at `.claude/skills/payload/` (start with `SKILL.md`, details in `reference/`). Use it for Payload API/config specifics — it does not override this file; this file remains the source of truth for scope and decisions.
+
 ---
 
 ## 0. How to use this file (agent instructions)

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: karacter
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: karacter
+    ports:
+      - '5432:5432'
+    volumes:
+      - karacter_pgdata:/var/lib/postgresql/data
+
+volumes:
+  karacter_pgdata:

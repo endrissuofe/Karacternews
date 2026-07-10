@@ -1,32 +1,32 @@
-# dependencies
-node_modules/
-
-# Next.js build output
-.next/
-out/
-
-# environment variables (never commit secrets)
+build
+dist
+dist / media
+node_modules
+.DS_Store
+Thumbs.db
 .env
 .env.local
 .env.*.local
-
-# Payload
+.next
+next-env.d.ts
+.vercel
 .payload/
-
-# logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# editor
-.vscode/
+coverage/
 .idea/
 
-# misc
-dist/
-build/
-coverage/
+# Payload default media upload directory
+public/media/
+
+public/robots.txt
+public/sitemap*.xml
+
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
