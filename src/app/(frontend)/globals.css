@@ -117,7 +117,19 @@
   --ink: #16130e;
   --paper: #f6f7f5;
   --surface: #eceeea;
-  --scarlet: #e23140;
+  /*
+   * Scarlet, three roles (ADR-0001 — brand #e23140 is only ~4.1:1 against
+   * both paper and ink, failing WCAG AA for small text):
+   *  --scarlet-brand: the true brand hex. Logo, large display text (≥24px /
+   *    19px bold), non-text accents ONLY.
+   *  --scarlet: text accent. Theme-aware — darker on light surfaces,
+   *    lighter on dark — always ≥4.5:1 on background/surface/card.
+   *  --scarlet-fill: background fill carrying paper text (ticker, breaking
+   *    badge). Constant across themes; 5.1:1 with paper.
+   */
+  --scarlet-brand: #e23140;
+  --scarlet: #cc2130;
+  --scarlet-fill: #cc2130;
   --amber: #f2a93b;
   --ink-soft: #6b6b66;
 
@@ -135,7 +147,7 @@
   --muted-foreground: var(--ink-soft);
   --accent: var(--surface);
   --accent-foreground: var(--ink);
-  --destructive: var(--scarlet);
+  --destructive: var(--scarlet-fill);
   --destructive-foreground: var(--paper);
   --border: var(--surface);
   --input: var(--surface);
@@ -160,6 +172,7 @@
 }
 
 [data-theme='dark'] {
+  --scarlet: #f2606b; /* text-accent variant for dark surfaces (ADR-0001) */
   --background: var(--ink);
   --foreground: var(--paper);
   --card: #221e17;
@@ -174,7 +187,7 @@
   --muted-foreground: #a8a49b;
   --accent: #2e2a22;
   --accent-foreground: var(--paper);
-  --destructive: var(--scarlet);
+  --destructive: var(--scarlet-fill);
   --destructive-foreground: var(--paper);
   --border: #2e2a22;
   --input: #2e2a22;
@@ -202,6 +215,8 @@
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-scarlet: var(--scarlet);
+  --color-scarlet-fill: var(--scarlet-fill);
+  --color-scarlet-brand: var(--scarlet-brand);
   --color-amber: var(--amber);
   --color-ink-soft: var(--ink-soft);
   --color-background: var(--background);

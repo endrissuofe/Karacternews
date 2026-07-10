@@ -77,12 +77,14 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
 
-  // NOTE: this is used by the browser to determine which image to download at different screen sizes
+  // NOTE: this is used by the browser to determine which image to download at
+  // different screen sizes. The template's old default emitted `w` units, which
+  // are invalid in `sizes` (they belong in `srcset`) — browsers ignored it and
+  // fetched the largest candidate. `100vw` is the correct default for
+  // full-bleed/fill images; pass an explicit `size` prop for smaller layouts.
   const sizes = sizeFromProps
     ? sizeFromProps
-    : Object.entries(breakpoints)
-        .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-        .join(', ')
+    : `(max-width: ${breakpoints.xl ?? 1280}px) 100vw, ${breakpoints.xl ?? 1280}px`
 
   return (
     <picture className={cn(pictureClassName)}>
@@ -94,7 +96,7 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         placeholder="blur"
         blurDataURL={placeholderBlur}
         priority={priority}
-        quality={100}
+        quality={75}
         loading={loading}
         sizes={sizes}
         src={src}

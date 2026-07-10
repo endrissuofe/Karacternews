@@ -36,7 +36,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data }) => {
     >
       <div className="container flex items-center justify-between py-3.5">
         <Link href="/" aria-label="Karacter News — home">
-          <Logo loading="eager" priority="high" />
+          <Logo />
         </Link>
         <HeaderNav data={data} />
       </div>

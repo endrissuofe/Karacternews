@@ -76,7 +76,8 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
   const shareUrl = `${getServerSideURL()}/article/${article.slug}`
 
   return (
-    <article className="pb-16 pt-6">
+    <main>
+      <article className="pb-16 pt-6">
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
@@ -94,7 +95,7 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
         )}
 
         {article.isBreaking && (
-          <span className="ml-2 inline-block rounded-[3px] bg-ink px-1.5 py-0.5 align-middle font-mono text-[10px] font-semibold uppercase tracking-wider text-amber">
+          <span className="ml-2 inline-block rounded-[3px] bg-scarlet-fill px-1.5 py-0.5 align-middle font-mono text-[10px] font-semibold uppercase tracking-wider text-paper">
             Breaking
           </span>
         )}
@@ -191,7 +192,8 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
           </section>
         )}
       </div>
-    </article>
+      </article>
+    </main>
   )
 }
 

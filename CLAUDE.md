@@ -61,8 +61,10 @@ If a change to any of the above seems necessary, write an ADR and get sign-off f
 
 ## 4. Scope — CURRENT INCREMENT
 
-> **Active increment:** `Increment 0 — Walking Skeleton`
+> **Active increment:** `Increment 1 — Usable Read Site` (functionally built; closing checklist in progress)
 > Update this line as we progress. Only build what the active increment lists in §9. Everything else is OUT.
+>
+> **Decision (2026-07-10):** the persistent on-air audio bar (§11 signature element) is **deferred to Increment 5 (Podcasts)** — there is no audio to play before then. Not required to close Increment 1.
 
 ---
 
@@ -208,7 +210,9 @@ docs/adr/                Architecture Decision Records
 | `--ink` | `#16130E` | Text, trust, dark surfaces |
 | `--paper` | `#F6F7F5` | Page background |
 | `--surface` | `#ECEEEA` | Cards, dividers, quiet fills |
-| `--scarlet` | `#E23140` | Breaking news, links, podcast-playing accent (use sparingly) |
+| `--scarlet-brand` | `#E23140` | Brand scarlet: logo, large display text (≥24px / 19px bold), non-text accents only (ADR-0001) |
+| `--scarlet` | `#CC2130` light / `#F2606B` dark | Text accent: breaking news labels, links, podcast-playing accent (use sparingly). Theme-aware for WCAG AA (ADR-0001) |
+| `--scarlet-fill` | `#CC2130` | Scarlet backgrounds carrying paper text (ticker, breaking badge) (ADR-0001) |
 | `--amber` | `#F2A93B` | On-air / audio / now-playing |
 
 **Type roles:** Display = a condensed grotesque used with restraint (headlines). Body = a readable serif for long-form. Utility = a mono/tight sans for bylines, timestamps, data. Set a clear scale with real weight contrast. Self-host fonts, `font-display: swap`, subset.

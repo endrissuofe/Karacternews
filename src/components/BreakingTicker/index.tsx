@@ -19,7 +19,7 @@ export const BreakingTicker: React.FC<{ articles: TickerArticle[] }> = ({ articl
       aria-hidden={ariaHidden || undefined}
       className="flex items-center gap-2.5 whitespace-nowrap px-4"
     >
-      <span className="rounded-[3px] bg-ink px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-amber">
+      <span className="rounded-[3px] bg-ink px-1.5 py-0.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-paper">
         Breaking
       </span>
       {articles.map((article, i) => (
@@ -38,7 +38,7 @@ export const BreakingTicker: React.FC<{ articles: TickerArticle[] }> = ({ articl
   )
 
   return (
-    <div aria-label="Breaking news" className="overflow-hidden bg-scarlet py-2">
+    <div aria-label="Breaking news" className="overflow-hidden bg-scarlet-fill py-2">
       <div className="flex w-max animate-ticker motion-reduce:animate-none">
         {copy(false)}
         {copy(true)}

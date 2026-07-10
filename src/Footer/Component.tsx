@@ -22,7 +22,7 @@ export async function Footer() {
           {navItems.map(({ link }, i) => {
             return (
               <CMSLink
-                className="font-mono text-[11px] font-semibold uppercase tracking-wider text-paper hover:text-amber"
+                className="font-mono text-[11px] font-semibold uppercase tracking-wider text-paper hover:underline"
                 key={i}
                 {...link}
                 appearance="inline"
