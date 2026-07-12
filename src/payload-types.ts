@@ -73,6 +73,9 @@ export interface Config {
     categories: Category;
     tags: Tag;
     users: User;
+    'podcast-shows': PodcastShow;
+    'podcast-episodes': PodcastEpisode;
+    'podcast-audio': PodcastAudio;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -95,6 +98,9 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    'podcast-shows': PodcastShowsSelect<false> | PodcastShowsSelect<true>;
+    'podcast-episodes': PodcastEpisodesSelect<false> | PodcastEpisodesSelect<true>;
+    'podcast-audio': PodcastAudioSelect<false> | PodcastAudioSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -823,6 +829,91 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-shows".
+ */
+export interface PodcastShow {
+  id: number;
+  title: string;
+  /**
+   * Shown on the podcast index and in podcast apps (RSS).
+   */
+  description: string;
+  /**
+   * Square artwork, ideally 3000×3000 (podcast apps require ≥1400×1400).
+   */
+  coverImage: number | Media;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-episodes".
+ */
+export interface PodcastEpisode {
+  id: number;
+  title: string;
+  show: number | PodcastShow;
+  showNotes?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  audio: number | PodcastAudio;
+  /**
+   * Seconds. System-managed — copied from the audio file.
+   */
+  duration?: number | null;
+  /**
+   * Episode is publicly visible once this time has passed.
+   */
+  publishedAt?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-audio".
+ */
+export interface PodcastAudio {
+  id: number;
+  /**
+   * Seconds. System-managed — parsed from the audio file on upload.
+   */
+  duration?: number | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1012,6 +1103,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: number | User;
+      } | null)
+    | ({
+        relationTo: 'podcast-shows';
+        value: number | PodcastShow;
+      } | null)
+    | ({
+        relationTo: 'podcast-episodes';
+        value: number | PodcastEpisode;
+      } | null)
+    | ({
+        relationTo: 'podcast-audio';
+        value: number | PodcastAudio;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1394,6 +1497,53 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-shows_select".
+ */
+export interface PodcastShowsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  coverImage?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-episodes_select".
+ */
+export interface PodcastEpisodesSelect<T extends boolean = true> {
+  title?: T;
+  show?: T;
+  showNotes?: T;
+  audio?: T;
+  duration?: T;
+  publishedAt?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcast-audio_select".
+ */
+export interface PodcastAudioSelect<T extends boolean = true> {
+  duration?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

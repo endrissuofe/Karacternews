@@ -1,4 +1,5 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { s3Storage } from '@payloadcms/storage-s3'
 import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
@@ -30,7 +31,35 @@ const generateURL: GenerateURL<Article | Page> = ({ doc }) => {
   return isArticle ? `${url}/article/${doc.slug}` : `${url}/${doc.slug}`
 }
 
+// Cloudflare R2 via the S3 adapter (CLAUDE.md §2 locked decision — code
+// only against the S3 API, portable to MinIO/B2). Scoped to podcast audio
+// (Increment 5 scope is "audio→R2"; images stay on local storage for now).
+// Only enabled when the R2 env vars exist, so dev machines and CI without
+// credentials fall back to local file storage transparently.
+const r2Configured = Boolean(process.env.R2_BUCKET && process.env.R2_ENDPOINT)
+
+const storagePlugins: Plugin[] = r2Configured
+  ? [
+      s3Storage({
+        collections: {
+          'podcast-audio': true,
+        },
+        bucket: process.env.R2_BUCKET || '',
+        config: {
+          endpoint: process.env.R2_ENDPOINT,
+          region: 'auto',
+          credentials: {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID || '',
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || '',
+          },
+          forcePathStyle: true,
+        },
+      }),
+    ]
+  : []
+
 export const plugins: Plugin[] = [
+  ...storagePlugins,
   redirectsPlugin({
     collections: ['pages', 'articles'],
     overrides: {

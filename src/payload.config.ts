@@ -8,6 +8,9 @@ import { Articles } from './collections/Articles'
 import { Categories } from './collections/Categories'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { PodcastAudio } from './collections/PodcastAudio'
+import { PodcastEpisodes } from './collections/PodcastEpisodes'
+import { PodcastShows } from './collections/PodcastShows'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
@@ -70,7 +73,17 @@ export default buildConfig({
     push: false,
     migrationDir: './src/migrations',
   }),
-  collections: [Pages, Articles, Media, Categories, Tags, Users],
+  collections: [
+    Pages,
+    Articles,
+    Media,
+    Categories,
+    Tags,
+    Users,
+    PodcastShows,
+    PodcastEpisodes,
+    PodcastAudio,
+  ],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings],
   plugins,
