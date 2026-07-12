@@ -14,6 +14,7 @@ import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { SiteSettings } from './SiteSettings/config'
 import { plugins } from './plugins'
+import { publishScheduledArticles } from './jobs/publishScheduledArticles'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 
@@ -94,6 +95,15 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    tasks: [publishScheduledArticles],
+    // In-process runner: fine on our single always-on VPS (CLAUDE.md §2).
+    // Revisit only if we ever split workers out (see Payload bin script).
+    autoRun: [
+      {
+        cron: '* * * * *',
+        queue: 'scheduled-publish',
+        limit: 10,
+      },
+    ],
   },
 })

@@ -10,12 +10,15 @@ import {
 } from '@payloadcms/richtext-lexical'
 
 import { authenticated } from '../../access/authenticated'
-import { publishedOrAuthenticated } from '../../access/publishedOrAuthenticated'
+import { publishedOrOwnOrEditor } from '../../access/publishedOrOwnOrEditor'
 import { isOwnArticleOrEditorOrAdmin } from '../../access/isOwnArticleOrEditorOrAdmin'
+import { isEditorOrAdminField } from '../../access/isEditorOrAdminField'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { setDefaultsAndPublishedAt } from './hooks/setDefaultsAndPublishedAt'
+import { enforceStatusWorkflow } from './hooks/enforceStatusWorkflow'
+import { syncSearchText } from './hooks/syncSearchText'
 import { revalidateArticle, revalidateArticleDelete } from './hooks/revalidateArticle'
 
 import {
@@ -27,15 +30,18 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
 
-// Per CLAUDE.md §6. Public reads only status=published (publishedOrAuthenticated);
-// authors/contributors CRUD their own (isOwnArticleOrEditorOrAdmin on
-// update/delete); editors/admins CRUD all.
+// Per CLAUDE.md §6 + Increment 2 editorial workflow:
+// - public reads only status=published; authors/contributors additionally
+//   read their own work in any status; editors/admins read all.
+// - authors/contributors update/delete only their own draft/in_review
+//   articles (post-review states are editor-only) and cannot set a status
+//   beyond in_review (enforceStatusWorkflow).
 export const Articles: CollectionConfig<'articles'> = {
   slug: 'articles',
   access: {
     create: authenticated,
     delete: isOwnArticleOrEditorOrAdmin,
-    read: publishedOrAuthenticated,
+    read: publishedOrOwnOrEditor,
     update: isOwnArticleOrEditorOrAdmin,
   },
   defaultPopulate: {
@@ -117,6 +123,12 @@ export const Articles: CollectionConfig<'articles'> = {
             {
               name: 'author',
               type: 'relationship',
+              access: {
+                // Non-editors can't assign or reassign authorship; the
+                // beforeChange hook defaults it to the logged-in user.
+                create: isEditorOrAdminField,
+                update: isEditorOrAdminField,
+              },
               admin: {
                 position: 'sidebar',
               },
@@ -156,6 +168,9 @@ export const Articles: CollectionConfig<'articles'> = {
     {
       name: 'status',
       type: 'select',
+      // Public reads and the scheduled-publish job filter on status
+      // constantly — index it (Increment 2 migration).
+      index: true,
       admin: {
         position: 'sidebar',
       },
@@ -190,6 +205,16 @@ export const Articles: CollectionConfig<'articles'> = {
       defaultValue: 0,
     },
     {
+      // Flattened plain text of `body`, maintained by syncSearchText.
+      // Feeds the generated tsvector column (Increment 3 migration);
+      // never edited by hand, hidden from the admin UI.
+      name: 'searchText',
+      type: 'textarea',
+      admin: {
+        hidden: true,
+      },
+    },
+    {
       name: 'publishedAt',
       type: 'date',
       admin: {
@@ -202,7 +227,8 @@ export const Articles: CollectionConfig<'articles'> = {
     slugField(),
   ],
   hooks: {
-    beforeChange: [setDefaultsAndPublishedAt],
+    beforeValidate: [enforceStatusWorkflow],
+    beforeChange: [setDefaultsAndPublishedAt, syncSearchText],
     afterChange: [revalidateArticle],
     afterDelete: [revalidateArticleDelete],
   },

@@ -61,7 +61,9 @@ If a change to any of the above seems necessary, write an ADR and get sign-off f
 
 ## 4. Scope — CURRENT INCREMENT
 
-> **Active increment:** `Increment 1 — Usable Read Site` (functionally built; closing checklist in progress)
+> **Active increment:** `Increment 4 — Breaking / Trending / Newsletter capture` (Increment 3 closed 2026-07-12: Postgres FTS with weighted tsvector + GIN, ranked /search with filters, header search)
+>
+> **Note (2026-07-12):** `/feed.xml` (§7) was never built in Increment 1; slotted into Increment 4 alongside the newsroom features.
 > Update this line as we progress. Only build what the active increment lists in §9. Everything else is OUT.
 >
 > **Decision (2026-07-10):** the persistent on-air audio bar (§11 signature element) is **deferred to Increment 5 (Podcasts)** — there is no audio to play before then. Not required to close Increment 1.
