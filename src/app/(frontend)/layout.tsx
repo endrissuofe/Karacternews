@@ -5,6 +5,7 @@ import { IBM_Plex_Mono, Oswald, Source_Serif_4 } from 'next/font/google'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
+import { BreakingTickerServer } from '@/components/BreakingTicker/Server'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
@@ -59,6 +60,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           />
 
           <Header />
+          <BreakingTickerServer />
           {children}
           <Footer />
         </Providers>
@@ -72,5 +74,10 @@ export const metadata: Metadata = {
   openGraph: mergeOpenGraph(),
   twitter: {
     card: 'summary_large_image',
+  },
+  alternates: {
+    types: {
+      'application/rss+xml': '/feed.xml',
+    },
   },
 }

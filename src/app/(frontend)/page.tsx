@@ -7,7 +7,6 @@ import React from 'react'
 
 import type { Category } from '@/payload-types'
 
-import { BreakingTicker } from '@/components/BreakingTicker'
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { Media } from '@/components/Media'
 import type { CardPostData } from '@/components/Card'
@@ -19,7 +18,7 @@ import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 export default async function HomePage() {
   const payload = await getPayload({ config: configPromise })
 
-  const [latest, breaking, categories] = await Promise.all([
+  const [latest, trending, categories] = await Promise.all([
     payload.find({
       collection: 'articles',
       overrideAccess: false,
@@ -28,14 +27,25 @@ export default async function HomePage() {
       depth: 1,
       limit: 13,
     }),
+    // Trending: most-viewed articles published in the last 7 days
+    // (Increment 4 decision, 2026-07-12). viewCount is bumped per article
+    // view — see incrementViewCount.
     payload.find({
       collection: 'articles',
       overrideAccess: false,
       where: {
-        and: [{ status: { equals: 'published' } }, { isBreaking: { equals: true } }],
+        and: [
+          { status: { equals: 'published' } },
+          {
+            publishedAt: {
+              greater_than_equal: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            },
+          },
+          { viewCount: { greater_than: 0 } },
+        ],
       },
-      sort: '-publishedAt',
-      select: { title: true, slug: true },
+      sort: '-viewCount',
+      select: { title: true, slug: true, viewCount: true },
       limit: 5,
     }),
     payload.find({
@@ -57,7 +67,6 @@ export default async function HomePage() {
 
   return (
     <main className="pb-16">
-      <BreakingTicker articles={breaking.docs} />
 
       {heroArticle && (
         <section className="container border-b border-border pb-6 pt-5">
@@ -83,6 +92,32 @@ export default async function HomePage() {
               {heroArticle.publishedAt && timeAgo(heroArticle.publishedAt)}
             </p>
           </Link>
+        </section>
+      )}
+
+      {trending.docs.length > 0 && (
+        <section className="container border-b border-border py-5" aria-label="Trending stories">
+          <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wider text-foreground">
+            Trending
+          </h2>
+          <ol className="grid gap-x-8 gap-y-2.5 md:grid-cols-2 lg:grid-cols-5">
+            {trending.docs.map((article, i) => (
+              <li key={article.id} className="flex gap-2.5">
+                <span
+                  aria-hidden="true"
+                  className="font-display text-lg font-bold leading-6 text-scarlet"
+                >
+                  {i + 1}
+                </span>
+                <Link
+                  className="font-serif text-sm leading-6 text-foreground hover:underline"
+                  href={`/article/${article.slug}`}
+                >
+                  {article.title}
+                </Link>
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 

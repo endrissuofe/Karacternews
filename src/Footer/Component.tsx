@@ -5,6 +5,7 @@ import React from 'react'
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
+import { NewsletterForm } from '@/components/NewsletterForm'
 
 export async function Footer() {
   const footerData = await getCachedGlobal('footer', 1)()
@@ -12,11 +13,13 @@ export async function Footer() {
   const navItems = footerData?.navItems || []
 
   return (
-    <footer className="mt-auto bg-ink text-paper">
+    <footer className="surface-ink mt-auto bg-ink text-paper">
       <div className="container flex flex-col gap-6 py-10">
         <Link className="flex items-center" href="/">
           <Logo />
         </Link>
+
+        <NewsletterForm />
 
         <nav className="flex flex-wrap gap-x-6 gap-y-3">
           {navItems.map(({ link }, i) => {

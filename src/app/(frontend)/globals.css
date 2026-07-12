@@ -210,6 +210,12 @@
   --error: oklch(45% 0.1 25deg);
 }
 
+/* Surfaces that are permanently ink (e.g. the footer) regardless of the
+   page theme use the dark-surface scarlet text variant (ADR-0001). */
+.surface-ink {
+  --scarlet: #f2606b;
+}
+
 @theme inline {
   --color-ink: var(--ink);
   --color-paper: var(--paper);

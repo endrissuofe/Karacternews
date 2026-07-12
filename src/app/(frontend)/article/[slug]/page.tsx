@@ -15,6 +15,7 @@ import { generateArticleMeta } from '@/utilities/generateArticleMeta'
 import { articleJsonLd } from '@/utilities/articleJsonLd'
 import { getServerSideURL } from '@/utilities/getURL'
 import { getPublicAuthorById } from '@/utilities/getPublicAuthor'
+import { incrementViewCount } from '@/utilities/incrementViewCount'
 import type { Article, Category } from '@/payload-types'
 
 type Args = {
@@ -66,6 +67,10 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
   const article = await queryArticleBySlug(slug)
 
   if (!article) return notFound()
+
+  // Fire-and-forget view counter (Increment 4) — never blocks rendering.
+  const payload = await getPayload({ config: configPromise })
+  incrementViewCount(payload, article.id)
 
   const [related, author] = await Promise.all([
     queryRelated(article),
