@@ -1,7 +1,9 @@
 # ADR-0003: Render free tier for pre-launch UAT hosting
 
-- **Status:** Accepted (supersedes ADR-0002's Oracle choice; ADR-0002's
-  "Hetzner remains production host at launch" stands)
+- **Status:** Superseded 2026-07-15 — client approved the Hetzner VPS
+  (the original §2 plan) with domain **karaktermedia.com**; Render was
+  never adopted and `render.yaml` was removed. The media→R2 move made
+  here stands (it was the locked §2 direction anyway).
 - **Date:** 2026-07-13
 - **Decision maker:** Drix
 

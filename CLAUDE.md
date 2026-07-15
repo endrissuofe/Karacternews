@@ -63,7 +63,7 @@ If a change to any of the above seems necessary, write an ADR and get sign-off f
 
 > **Active increment:** `Increment 5.5 — Go-live + YouTube embeds` (Increment 5 closed 2026-07-12: podcast collections, audio→R2, per-show RSS, persistent audio bar — verified live in browser; pending final R2-dashboard spot-check)
 >
-> **Decision (2026-07-13, ADR-0003, supersedes ADR-0002's host choice):** UAT hosting on **Render free tier** at ₦0/month (Oracle provisioning proved impractical). All media now lives in R2 (Render disk is ephemeral); scheduled publishing driven by an external free cron hitting `/api/payload-jobs/run`. Hetzner + the `infra/` Docker stack remain the production plan at launch.
+> **Decision (2026-07-15):** client approved the **Hetzner VPS** (original §2 plan) and sourced the domain **karaktermedia.com** — ADR-0003's Render detour is superseded before adoption. All media stays in R2 (kept from ADR-0003). Deploy via the `infra/` Docker stack; in-process jobs autoRun handles scheduled publishing (always-on box, no external cron needed).
 > Update this line as we progress. Only build what the active increment lists in §9. Everything else is OUT.
 >
 > **Decision (2026-07-10):** the persistent on-air audio bar (§11 signature element) is **deferred to Increment 5 (Podcasts)** — there is no audio to play before then. Not required to close Increment 1.
