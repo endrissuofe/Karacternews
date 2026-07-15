@@ -102,7 +102,6 @@ export const AudioProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <AudioCtx.Provider value={{ track, isPlaying, play, toggle }}>
       {children}
 
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio ref={audioRef} preload="none" />
 
       {track && (

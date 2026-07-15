@@ -86,7 +86,6 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
       <article className="pb-16 pt-6">
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd(article)) }}
       />
 
