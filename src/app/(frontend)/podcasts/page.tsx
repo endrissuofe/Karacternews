@@ -6,6 +6,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Media } from '@/components/Media'
+import { SectionHeading } from '@/components/SectionHeading'
 import { YouTubeEmbed } from '@/components/YouTubeEmbed'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { formatArticleDate } from '@/utilities/formatDateTime'
@@ -123,9 +124,7 @@ export default async function PodcastsPage() {
 
       {episodes.docs.length > 0 && (
         <section className="container border-t border-border pt-8">
-          <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-foreground">
-            Latest episodes
-          </h2>
+          <SectionHeading>Latest episodes</SectionHeading>
           <ul className="divide-y divide-border">
             {episodes.docs.map((ep) => {
               const show = typeof ep.show === 'object' ? (ep.show as PodcastShow) : null

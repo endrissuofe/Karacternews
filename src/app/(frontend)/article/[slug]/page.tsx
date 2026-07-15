@@ -8,6 +8,7 @@ import React, { cache } from 'react'
 
 import RichText from '@/components/RichText'
 import { Media } from '@/components/Media'
+import { SectionHeading } from '@/components/SectionHeading'
 import { ShareRow } from '@/components/ShareRow'
 import { formatArticleDate } from '@/utilities/formatDateTime'
 import { readTimeMinutes } from '@/utilities/readTime'
@@ -131,7 +132,7 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
         </div>
 
         {article.coverImage && typeof article.coverImage === 'object' && (
-          <div className="relative mb-5 aspect-[16/10] overflow-hidden rounded-xl bg-surface">
+          <div className="relative mb-5 aspect-[16/10] overflow-hidden rounded-xl bg-surface ring-1 ring-border">
             <Media fill imgClassName="object-cover" priority resource={article.coverImage} />
           </div>
         )}
@@ -161,9 +162,7 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
 
         {related.length > 0 && (
           <section className="mt-6">
-            <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-foreground">
-              Related
-            </h2>
+            <SectionHeading>Related</SectionHeading>
             <div className="flex flex-col gap-4">
               {related.map((rel) => {
                 const relCategory =

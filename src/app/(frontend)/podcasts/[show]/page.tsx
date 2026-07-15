@@ -7,6 +7,7 @@ import Link from 'next/link'
 import React, { cache } from 'react'
 
 import { Media } from '@/components/Media'
+import { SectionHeading } from '@/components/SectionHeading'
 import { formatArticleDate } from '@/utilities/formatDateTime'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
@@ -76,9 +77,7 @@ export default async function PodcastShowPage({ params: paramsPromise }: Args) {
       </div>
 
       <section className="container border-t border-border pt-6">
-        <h2 className="mb-4 font-display text-sm font-bold uppercase tracking-wider text-foreground">
-          Episodes
-        </h2>
+        <SectionHeading>Episodes</SectionHeading>
         {episodes.docs.length === 0 ? (
           <p className="font-serif text-muted-foreground">No episodes yet — stay tuned.</p>
         ) : (

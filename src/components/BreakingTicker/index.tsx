@@ -26,7 +26,7 @@ export const BreakingTicker: React.FC<{ articles: TickerArticle[] }> = ({ articl
         <React.Fragment key={article.id}>
           {i > 0 && <span className="text-paper/70">·</span>}
           <Link
-            className="font-mono text-xs tracking-wide text-paper hover:underline"
+            className="font-mono text-[13px] tracking-wide text-paper hover:underline"
             href={`/article/${article.slug}`}
             tabIndex={ariaHidden ? -1 : undefined}
           >
@@ -38,7 +38,7 @@ export const BreakingTicker: React.FC<{ articles: TickerArticle[] }> = ({ articl
   )
 
   return (
-    <div aria-label="Breaking news" className="overflow-hidden bg-scarlet-fill py-2">
+    <div aria-label="Breaking news" className="overflow-hidden bg-scarlet-fill py-2.5 shadow-md">
       <div className="flex w-max animate-ticker motion-reduce:animate-none">
         {copy(false)}
         {copy(true)}

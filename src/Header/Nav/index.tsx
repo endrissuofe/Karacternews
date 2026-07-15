@@ -31,7 +31,7 @@ export const HeaderNav: React.FC<{ data: HeaderType }> = ({ data }) => {
           name="q"
           type="search"
           placeholder="Search…"
-          className="w-24 rounded-md border border-border bg-background px-2 py-1 font-mono text-[11px] text-foreground placeholder:text-muted-foreground focus:w-36 focus:outline-none focus:ring-2 focus:ring-ring motion-safe:transition-[width] md:w-32 md:focus:w-44"
+          className="w-24 rounded-full border border-border bg-muted px-3 py-1.5 font-mono text-[11px] text-foreground placeholder:text-muted-foreground focus:w-36 focus:border-scarlet focus:outline-none motion-safe:transition-all md:w-32 md:focus:w-48"
         />
       </form>
     </nav>
