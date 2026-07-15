@@ -1,0 +1,13 @@
+# Origin TLS via Caddy + Let's Encrypt (CLAUDE.md §2). SITE_DOMAIN comes
+# from .env — e.g. "uat.karacter.ng". Before the domain exists, leave
+# SITE_DOMAIN unset and Caddy serves plain HTTP on :80 (UAT by IP).
+{$SITE_DOMAIN} {
+	encode gzip
+	reverse_proxy app:3000
+
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options SAMEORIGIN
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+}

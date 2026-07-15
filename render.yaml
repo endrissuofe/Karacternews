@@ -1,0 +1,62 @@
+# Render blueprint — UAT hosting on the free tier (ADR-0003).
+# Hetzner + infra/docker-compose.prod.yml remains the production plan.
+#
+# First deploy: Render dashboard → New → Blueprint → point at this repo.
+# Fill the sync:false env vars when prompted (values from your local .env;
+# NEXT_PUBLIC_SERVER_URL = https://<service-name>.onrender.com).
+#
+# Scheduled publishing on a spin-down host: create a free cron at
+# https://cron-job.org hitting
+#   GET https://<app>.onrender.com/api/payload-jobs/run?limit=10&queue=scheduled-publish
+# every 10 minutes with header  Authorization: Bearer <CRON_SECRET>
+# (doubles as a keep-alive that minimizes cold starts).
+
+databases:
+  - name: karacter-db
+    plan: free
+    databaseName: karacter
+    user: karacter
+
+services:
+  - type: web
+    name: karacter
+    runtime: node
+    plan: free
+    buildCommand: >-
+      corepack enable pnpm &&
+      pnpm install --frozen-lockfile &&
+      pnpm payload migrate &&
+      pnpm build &&
+      cp -r .next/static .next/standalone/.next/static &&
+      cp -r public .next/standalone/public
+    startCommand: node .next/standalone/server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: '22'
+      - key: BUILD_STANDALONE
+        value: '1'
+      - key: DATABASE_URL
+        fromDatabase:
+          name: karacter-db
+          property: connectionString
+      - key: PAYLOAD_SECRET
+        generateValue: true
+      - key: CRON_SECRET
+        generateValue: true
+      - key: PREVIEW_SECRET
+        generateValue: true
+      - key: NEXT_PUBLIC_SERVER_URL
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_LIST_ID
+        sync: false

@@ -61,7 +61,9 @@ If a change to any of the above seems necessary, write an ADR and get sign-off f
 
 ## 4. Scope — CURRENT INCREMENT
 
-> **Active increment:** `Increment 5 — Podcasts` (Increment 4 closed 2026-07-12: site-wide breaking ticker, view-count trending, Brevo newsletter capture, /feed.xml RSS — all verified live in browser)
+> **Active increment:** `Increment 5.5 — Go-live + YouTube embeds` (Increment 5 closed 2026-07-12: podcast collections, audio→R2, per-show RSS, persistent audio bar — verified live in browser; pending final R2-dashboard spot-check)
+>
+> **Decision (2026-07-13, ADR-0003, supersedes ADR-0002's host choice):** UAT hosting on **Render free tier** at ₦0/month (Oracle provisioning proved impractical). All media now lives in R2 (Render disk is ephemeral); scheduled publishing driven by an external free cron hitting `/api/payload-jobs/run`. Hetzner + the `infra/` Docker stack remain the production plan at launch.
 > Update this line as we progress. Only build what the active increment lists in §9. Everything else is OUT.
 >
 > **Decision (2026-07-10):** the persistent on-air audio bar (§11 signature element) is **deferred to Increment 5 (Podcasts)** — there is no audio to play before then. Not required to close Increment 1.
@@ -76,7 +78,7 @@ If a change to any of the above seems necessary, write an ADR and get sign-off f
 - Full newsletter *sending* at scale (capture only, for now)
 - AI features (summaries, semantic search, recommendations, auto-tagging)
 - Native mobile app
-- Video / VOD
+- Video / VOD (self-hosted video and VOD infrastructure stay OUT. **Exception, approved 2026-07-12:** embedding the client's YouTube content — a `youtubeUrl` field on PodcastEpisodes rendering the YouTube player on episode pages, and a SiteSettings group for the channel link + live-stream embed. Embeds only; we never host or proxy video.)
 - Internationalisation / multi-language
 - Paywall / subscriptions
 
@@ -177,6 +179,7 @@ docs/adr/                Architecture Decision Records
 | 3 | **Search** | Postgres full-text search + results UI + filters. (Meilisearch only if triggered.) | Readers can find stories |
 | 4 | **Breaking / Trending / Newsletter capture** | Breaking flag surfacing; simple view-count Trending; email capture via Brevo. | Feels like a live newsroom |
 | 5 | **Podcasts** | Show/episode collections + audio→R2 + valid RSS + player. | Multimedia, still ₦0 |
+| 5.5 | **Go-live + YouTube embeds** | Production deploy (host per §2/ADR) + CI + nightly backups + domain; YouTube embed fields (episode `youtubeUrl`, SiteSettings channel/live embed). | Client can test everything on a real URL |
 | 6 | **Observability upgrade** | Prometheus/Grafana/Loki + alerts (when the box has room). | See problems before readers do |
 | — | **Feature: Live Radio** | Only when earned (editorial commitment + audience + budget for its own box). See Feature Plan. | Deferred |
 

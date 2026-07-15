@@ -9,6 +9,8 @@ import React, { cache } from 'react'
 import RichText from '@/components/RichText'
 import { Media } from '@/components/Media'
 import { PlayEpisodeButton } from '@/components/PlayEpisodeButton'
+import { YouTubeEmbed } from '@/components/YouTubeEmbed'
+import { getYouTubeId } from '@/utilities/youtube'
 import { formatArticleDate } from '@/utilities/formatDateTime'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import type { PodcastShow } from '@/payload-types'
@@ -99,6 +101,18 @@ export default async function PodcastEpisodePage({ params: paramsPromise }: Args
             <p className="font-serif text-sm text-muted-foreground">Audio coming soon.</p>
           )}
         </div>
+
+        {(() => {
+          const videoId = getYouTubeId(episode.youtubeUrl)
+          return videoId ? (
+            <div className="mb-8">
+              <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Watch on YouTube
+              </p>
+              <YouTubeEmbed videoId={videoId} title={episode.title} />
+            </div>
+          ) : null
+        })()}
 
         {episode.showNotes && (
           <div className="prose prose-sm max-w-none font-serif dark:prose-invert">

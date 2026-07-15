@@ -4,6 +4,7 @@ import { slugField } from 'payload'
 import { isEditorOrAdmin } from '../../access/isEditorOrAdmin'
 import { publishedEpisodeOrEditor } from './access/publishedEpisodeOrEditor'
 import { syncDurationFromAudio } from './hooks/syncDurationFromAudio'
+import { validateYouTubeUrl } from '../../utilities/youtube'
 
 // Per CLAUDE.md §6 (Increment 5). Editors/admins manage episodes; the
 // public reads only episodes whose publishedAt has passed (episodes have
@@ -51,6 +52,18 @@ export const PodcastEpisodes: CollectionConfig = {
       type: 'upload',
       relationTo: 'podcast-audio',
       required: true,
+    },
+    {
+      // §5 exception (2026-07-12): the client also publishes episodes on
+      // YouTube — optional link renders the embedded player on the
+      // episode page. Embed only; we never host video.
+      name: 'youtubeUrl',
+      type: 'text',
+      label: 'YouTube URL',
+      validate: (value: string | null | undefined) => validateYouTubeUrl(value),
+      admin: {
+        description: 'Optional. If this episode is also on YouTube, paste the video link.',
+      },
     },
     {
       name: 'duration',

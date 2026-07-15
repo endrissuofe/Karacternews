@@ -310,6 +310,7 @@ export interface Media {
     };
     [k: string]: unknown;
   } | null;
+  prefix?: string | null;
   folder?: (number | null) | FolderInterface;
   updatedAt: string;
   createdAt: string;
@@ -875,6 +876,10 @@ export interface PodcastEpisode {
   } | null;
   audio: number | PodcastAudio;
   /**
+   * Optional. If this episode is also on YouTube, paste the video link.
+   */
+  youtubeUrl?: string | null;
+  /**
    * Seconds. System-managed — copied from the audio file.
    */
   duration?: number | null;
@@ -900,6 +905,7 @@ export interface PodcastAudio {
    * Seconds. System-managed — parsed from the audio file on upload.
    */
   duration?: number | null;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -1345,6 +1351,7 @@ export interface ArticlesSelect<T extends boolean = true> {
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
   caption?: T;
+  prefix?: T;
   folder?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1520,6 +1527,7 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
   show?: T;
   showNotes?: T;
   audio?: T;
+  youtubeUrl?: T;
   duration?: T;
   publishedAt?: T;
   generateSlug?: T;
@@ -1533,6 +1541,7 @@ export interface PodcastEpisodesSelect<T extends boolean = true> {
  */
 export interface PodcastAudioSelect<T extends boolean = true> {
   duration?: T;
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1865,6 +1874,16 @@ export interface SiteSetting {
     instagram?: string | null;
     linkedin?: string | null;
   };
+  youtube?: {
+    /**
+     * Link to the YouTube channel (shown on the podcasts page).
+     */
+    channelUrl?: string | null;
+    /**
+     * When the client is live on YouTube, paste the live link here — the podcasts page shows the embedded stream. Clear it when the stream ends.
+     */
+    liveStreamUrl?: string | null;
+  };
   homepageFeatured?: {
     /**
      * Optional. If unset, the home page falls back to the latest article.
@@ -1956,6 +1975,12 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         x?: T;
         instagram?: T;
         linkedin?: T;
+      };
+  youtube?:
+    | T
+    | {
+        channelUrl?: T;
+        liveStreamUrl?: T;
       };
   homepageFeatured?:
     | T

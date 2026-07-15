@@ -35,6 +35,30 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
     {
+      // §5 exception (2026-07-12): client's YouTube presence. Embeds only.
+      name: 'youtube',
+      type: 'group',
+      label: 'YouTube',
+      fields: [
+        {
+          name: 'channelUrl',
+          type: 'text',
+          admin: {
+            description: 'Link to the YouTube channel (shown on the podcasts page).',
+          },
+        },
+        {
+          name: 'liveStreamUrl',
+          type: 'text',
+          label: 'Live stream URL',
+          admin: {
+            description:
+              'When the client is live on YouTube, paste the live link here — the podcasts page shows the embedded stream. Clear it when the stream ends.',
+          },
+        },
+      ],
+    },
+    {
       name: 'homepageFeatured',
       type: 'group',
       label: 'Homepage Featured Slots',

@@ -32,17 +32,25 @@ const generateURL: GenerateURL<Article | Page> = ({ doc }) => {
 }
 
 // Cloudflare R2 via the S3 adapter (CLAUDE.md §2 locked decision — code
-// only against the S3 API, portable to MinIO/B2). Scoped to podcast audio
-// (Increment 5 scope is "audio→R2"; images stay on local storage for now).
+// only against the S3 API, portable to MinIO/B2). Covers podcast audio
+// (Increment 5) AND images (Increment 5.5/ADR-0003 — Render's disk is
+// ephemeral, so local media storage is no longer viable in deployment).
 // Only enabled when the R2 env vars exist, so dev machines and CI without
 // credentials fall back to local file storage transparently.
+// NOTE: enabling R2 on a machine with pre-existing local media files means
+// those old files 404 (Payload serves via the adapter) — re-run the seed.
 const r2Configured = Boolean(process.env.R2_BUCKET && process.env.R2_ENDPOINT)
 
 const storagePlugins: Plugin[] = r2Configured
   ? [
       s3Storage({
         collections: {
-          'podcast-audio': true,
+          media: {
+            prefix: 'media',
+          },
+          'podcast-audio': {
+            prefix: 'podcast-audio',
+          },
         },
         bucket: process.env.R2_BUCKET || '',
         config: {

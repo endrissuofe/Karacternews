@@ -6,8 +6,10 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Media } from '@/components/Media'
+import { YouTubeEmbed } from '@/components/YouTubeEmbed'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 import { formatArticleDate } from '@/utilities/formatDateTime'
+import { getYouTubeId } from '@/utilities/youtube'
 import type { PodcastShow } from '@/payload-types'
 
 // Rendered per request (like category pages): podcast collections have no
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
 export default async function PodcastsPage() {
   const payload = await getPayload({ config: configPromise })
 
-  const [shows, episodes] = await Promise.all([
+  const [shows, episodes, siteSettings] = await Promise.all([
     payload.find({
       collection: 'podcast-shows',
       overrideAccess: false,
@@ -41,7 +43,11 @@ export default async function PodcastsPage() {
       depth: 1,
       limit: 10,
     }),
+    payload.findGlobal({ slug: 'site-settings', depth: 0 }),
   ])
+
+  const liveVideoId = getYouTubeId(siteSettings?.youtube?.liveStreamUrl)
+  const channelUrl = siteSettings?.youtube?.channelUrl || null
 
   return (
     <main className="pb-16 pt-8">
@@ -52,7 +58,32 @@ export default async function PodcastsPage() {
         <p className="mt-2 font-serif text-sm text-muted-foreground">
           Conversations and stories with character.
         </p>
+        {channelUrl && (
+          <p className="mt-2">
+            <a
+              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-scarlet hover:underline"
+              href={channelUrl}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              YouTube channel ↗
+            </a>
+          </p>
+        )}
       </div>
+
+      {liveVideoId && (
+        <section className="container mb-10" aria-label="Live stream">
+          <p className="mb-2 flex items-center gap-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-scarlet">
+            <span
+              aria-hidden="true"
+              className="h-2 w-2 rounded-full bg-scarlet-brand animate-onair motion-reduce:animate-none"
+            />
+            Live now
+          </p>
+          <YouTubeEmbed videoId={liveVideoId} title="Live stream" />
+        </section>
+      )}
 
       {shows.docs.length === 0 && (
         <div className="container font-serif text-muted-foreground">

@@ -1,0 +1,75 @@
+# Production/UAT stack (Increment 5.5, ADR-0002). Run from the repo root:
+#   docker compose -f infra/docker-compose.prod.yml --env-file .env up -d
+# See infra/scripts/deploy.sh for the full build-order (postgres must be
+# up and migrated BEFORE the app image builds — next build needs the DB).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: karacter
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: karacter
+    ports:
+      # Bound to localhost only: needed for build-time prerendering and
+      # migrations run from the host. Not reachable from the internet.
+      - '127.0.0.1:5432:5432'
+    volumes:
+      - karacter_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U karacter']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile
+      network: host # lets `next build` reach postgres on 127.0.0.1:5432
+      args:
+        DATABASE_URL: ${BUILD_DATABASE_URL:-postgres://karacter:${POSTGRES_PASSWORD}@127.0.0.1:5432/karacter}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://karacter:${POSTGRES_PASSWORD}@postgres:5432/karacter
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+      CRON_SECRET: ${CRON_SECRET}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_LIST_ID: ${BREVO_LIST_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+    volumes:
+      # Article images use local storage until their own R2 migration —
+      # persist them across container rebuilds.
+      - karacter_media:/app/public/media
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - karacter_caddy_data:/data
+      - karacter_caddy_config:/config
+
+volumes:
+  karacter_pgdata:
+  karacter_media:
+  karacter_caddy_data:
+  karacter_caddy_config:
