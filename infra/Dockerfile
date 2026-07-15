@@ -13,7 +13,9 @@ RUN corepack enable pnpm
 # --- deps ---
 FROM base AS deps
 WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
+# pnpm-workspace.yaml carries allowBuilds (sharp, esbuild) — without it
+# pnpm refuses their install scripts and the install fails.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # --- build ---
