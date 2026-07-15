@@ -15,5 +15,10 @@ export const getMediaUrl = (url: string | null | undefined, cacheTag?: string | 
     cacheTag = encodeURIComponent(cacheTag)
   }
 
-  return cacheTag ? `${url}?${cacheTag}` : url
+  // Since the R2 storage prefix, Payload URLs may already carry a query
+  // string (?prefix=media). Appending the cache tag with a second `?`
+  // produces an invalid URL that Next's image optimizer rejects with 400 —
+  // join with `&` when a query string exists.
+  if (!cacheTag) return url
+  return url.includes('?') ? `${url}&${cacheTag}` : `${url}?${cacheTag}`
 }
