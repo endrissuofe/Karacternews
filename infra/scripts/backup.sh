@@ -11,8 +11,9 @@
 # outage ran 19 days unnoticed because nothing watched this job.
 set -euo pipefail
 
+# .env on a server; in GitHub Actions (ADR-0006) the vars come from secrets.
 # shellcheck disable=SC1091
-set -a && source .env && set +a
+if [ -f .env ]; then set -a && source .env && set +a; fi
 
 STAMP=$(date -u +%Y%m%d-%H%M%S)
 FILE="karacter-${STAMP}.sql.gz"
@@ -58,7 +59,15 @@ aws_r2() {
 }
 
 echo "==> Dumping database"
-$COMPOSE exec -T postgres pg_dump -U karacter karacter | gzip > "$DUMP_PATH"
+if [ -n "${BACKUP_DATABASE_URL:-}" ]; then
+  # Managed Postgres (Neon, ADR-0006): dump over the network with a client
+  # at least as new as the server. Owners and grants are left out so the
+  # dump restores into any role (restore-test.sh, a future VPS).
+  docker run --rm postgres:17-alpine \
+    pg_dump --no-owner --no-privileges "$BACKUP_DATABASE_URL" | gzip > "$DUMP_PATH"
+else
+  $COMPOSE exec -T postgres pg_dump -U karacter karacter | gzip > "$DUMP_PATH"
+fi
 
 DUMP_BYTES=$(wc -c < "$DUMP_PATH")
 if [ "$DUMP_BYTES" -lt "$MIN_DUMP_BYTES" ]; then

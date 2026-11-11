@@ -109,14 +109,18 @@ export default buildConfig({
       },
     },
     tasks: [publishScheduledArticles],
-    // In-process runner: fine on our single always-on VPS (CLAUDE.md §2).
-    // Revisit only if we ever split workers out (see Payload bin script).
-    autoRun: [
-      {
-        cron: '* * * * *',
-        queue: 'scheduled-publish',
-        limit: 10,
-      },
-    ],
+    // In-process runner only on an always-on server (Docker/VPS). On Vercel
+    // functions are short-lived, so a cron in each instance never runs
+    // reliably; there .github/workflows/scheduled-publish.yml calls
+    // /api/payload-jobs/run with the CRON_SECRET bearer instead (ADR-0006).
+    autoRun: process.env.VERCEL
+      ? []
+      : [
+          {
+            cron: '* * * * *',
+            queue: 'scheduled-publish',
+            limit: 10,
+          },
+        ],
   },
 })
