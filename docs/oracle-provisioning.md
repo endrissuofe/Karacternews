@@ -53,13 +53,9 @@ origin — so optimise for capacity, not proximity.
   if you're repeatedly blocked with a vague error, that's the escalation
   path rather than endless retries
 
-## 2. Provision the ARM instance
+## 2. Provision the AMD micro instance
 
-Compute → Instances → Create:
-
-| Setting | Value |
-|---|---|
-Per **ADR-0005** we use the AMD shape, because ARM A1 capacity proved
+Compute → Instances → Create. Per **ADR-0005** we use the AMD shape, because ARM A1 capacity proved
 unobtainable in the home region.
 
 | Setting | Value |
@@ -132,7 +128,7 @@ it is almost always this.
 ## 4. Install Docker
 
 ```bash
-sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg awscli
+sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg unzip
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
   | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
@@ -142,6 +138,15 @@ https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
 sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 sudo usermod -aG docker "$USER" && newgrp docker
+```
+
+AWS CLI v2 (the backup and restore scripts need it; Ubuntu's `awscli` apt
+package is v1 on 22.04 and absent on 24.04):
+
+```bash
+curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+unzip -q /tmp/awscliv2.zip -d /tmp && sudo /tmp/aws/install && rm -rf /tmp/aws /tmp/awscliv2.zip
+aws --version   # aws-cli/2.x
 ```
 
 ## 5. Clone and configure
@@ -163,6 +168,7 @@ Fill in `.env`. None of these survive on the old box, so regenerate:
 | `R2_BUCKET` / `R2_ENDPOINT` | existing bucket + `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` |
 | `REQUIRE_R2` | `true` — **set this**, it prevents silent local-disk fallback |
 | `BACKUP_HEALTHCHECK_URL` | healthchecks.io ping URL (step 9) |
+| `RESTORE_TEST_HEALTHCHECK_URL` | second healthchecks.io check, ~32-day period (step 9) |
 | `CRON_SECRET` / `PREVIEW_SECRET` | new random strings |
 | `BREVO_API_KEY` / `BREVO_LIST_ID` | Brevo dashboard |
 | `NEXT_PUBLIC_SERVER_URL` | `https://karaktermedia.com` |
@@ -177,6 +183,9 @@ Start Postgres alone, then load the dump **before** the app starts:
 
 ```bash
 docker compose -f infra/docker-compose.micro.yml --env-file .env up -d postgres
+
+# Load .env into this shell so the R2 variables below are set
+set -a && source .env && set +a
 
 # Pull the dump from R2 (aws cli installed in step 4)
 AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" \
@@ -240,6 +249,12 @@ Oracle instance's public IP. Keep it **proxied** (orange cloud) and TLS at
 Caddy will issue a fresh Let's Encrypt certificate on first request. If it
 can't, port 80 is almost certainly blocked — revisit step 3b.
 
+If ports are open but `docker compose -f infra/docker-compose.micro.yml logs caddy`
+still shows the ACME challenge failing, switch the A record to **DNS only**
+(grey cloud) for a few minutes, let Caddy issue the certificate, then switch it
+back to proxied. The site is down anyway during a first cutover, so this costs
+nothing.
+
 ## 9. Close the gaps that caused the 19-day outage
 
 Do not skip this. It is the actual lesson of the incident.
@@ -250,8 +265,19 @@ cron:
 
 ```bash
 crontab -e
-15 2 * * * cd ~/karacter && bash infra/scripts/backup.sh >> /var/log/karacter-backup.log 2>&1
 ```
+
+Add both lines. Cron's default `PATH` omits `/usr/local/bin`, where AWS CLI
+v2 lives, and a normal user cannot write to `/var/log` — either mistake
+stops the job from ever running:
+
+```
+PATH=/usr/local/bin:/usr/bin:/bin
+15 2 * * * cd $HOME/karacter && bash infra/scripts/backup.sh >> $HOME/karacter-backup.log 2>&1
+```
+
+Run it once by hand (`bash infra/scripts/backup.sh`) and confirm the check
+turns green in healthchecks.io before relying on it.
 
 **Uptime monitoring** — UptimeRobot or Better Stack (free), 5-minute checks
 on `https://karaktermedia.com/`. This is what turns a 19-day outage into a
@@ -260,7 +286,12 @@ idle-reclamation risk.
 
 **Restore test** — CLAUDE.md §3.5 requires this monthly. Use
 `infra/scripts/restore-test.sh`. It was never run; that is why nobody knew
-the backup state during the incident.
+the backup state during the incident. Run it once after the first nightly
+backup, then schedule it (first of the month, 03:00, after the backup):
+
+```
+0 3 1 * * cd $HOME/karacter && bash infra/scripts/restore-test.sh >> $HOME/karacter-restore-test.log 2>&1
+```
 
 ## 10. Verify
 
