@@ -17,7 +17,12 @@ set -a && source .env && set +a
 STAMP=$(date -u +%Y%m%d-%H%M%S)
 FILE="karacter-${STAMP}.sql.gz"
 DUMP_PATH="/tmp/${FILE}"
-COMPOSE="docker compose -f infra/docker-compose.prod.yml --env-file .env"
+# Which compose file this host uses. The AMD micro (ADR-0005) runs
+# docker-compose.micro.yml; set KARACTER_COMPOSE in .env to override.
+# (Deliberately not named COMPOSE_FILE, which docker compose reads itself.)
+# Getting this wrong means pg_dump finds no postgres container and the
+# backup fails — loudly now, via the healthcheck ping below.
+COMPOSE="docker compose -f ${KARACTER_COMPOSE:-infra/docker-compose.micro.yml} --env-file .env"
 
 # A dump smaller than this means pg_dump produced nothing useful (empty or
 # broken database). Never upload one: it would become the newest backup and

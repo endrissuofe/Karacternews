@@ -1,0 +1,92 @@
+# Production stack for the Oracle Always Free AMD E2.1.Micro (ADR-0005).
+#
+# Differs from docker-compose.prod.yml in one essential way: it PULLS a
+# prebuilt image instead of building. The micro has 1 OCPU / 1 GB RAM and
+# cannot run `next build` — CI builds and publishes the image to GHCR.
+#
+# Run from the repo root:
+#   docker compose -f infra/docker-compose.micro.yml --env-file .env up -d
+# See infra/scripts/deploy-micro.sh, which pulls, migrates, then restarts.
+#
+# Memory notes. Postgres and Caddy are capped so they cannot starve the
+# app; the app is deliberately left uncapped so the kernel and swap absorb
+# its spikes rather than Docker OOM-killing the container (a hard limit on
+# the Next.js process shows up as an unexplained crash loop). Set up swap
+# before first boot — see docs/oracle-provisioning.md.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    # Tuned down for a 1 GB box: stock max_connections=100 with per-
+    # connection work_mem is the usual way Postgres starves everything
+    # else on a micro instance.
+    command: >-
+      postgres
+      -c shared_buffers=96MB
+      -c max_connections=20
+      -c work_mem=4MB
+      -c maintenance_work_mem=32MB
+      -c effective_cache_size=256MB
+    mem_limit: 256m
+    environment:
+      POSTGRES_USER: karacter
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: karacter
+    volumes:
+      - karacter_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U karacter']
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  app:
+    # Built and pushed by .github/workflows/ci.yml on push to main.
+    # Override IMAGE with a commit SHA tag to roll back, e.g.
+    #   IMAGE=ghcr.io/endrissuofe/karacternews:<sha> docker compose ... up -d
+    image: ${IMAGE:-ghcr.io/endrissuofe/karacternews:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://karacter:${POSTGRES_PASSWORD}@postgres:5432/karacter
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL}
+      CRON_SECRET: ${CRON_SECRET}
+      PREVIEW_SECRET: ${PREVIEW_SECRET}
+      BREVO_API_KEY: ${BREVO_API_KEY}
+      BREVO_LIST_ID: ${BREVO_LIST_ID}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET: ${R2_BUCKET}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+      # Fails the boot rather than silently storing uploads on local disk.
+      REQUIRE_R2: ${REQUIRE_R2}
+    volumes:
+      # Media lives in R2; this is a safety net for pre-R2 legacy files and
+      # keeps a misconfigured deploy from writing into the container layer.
+      - karacter_media:/app/public/media
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 64m
+    depends_on:
+      - app
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-:80}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - karacter_caddy_data:/data
+      - karacter_caddy_config:/config
+
+volumes:
+  karacter_pgdata:
+  karacter_media:
+  karacter_caddy_data:
+  karacter_caddy_config:
