@@ -1,0 +1,28 @@
+# Scheduled publishing on Vercel (ADR-0006). Serverless functions cannot
+# host Payload's in-process autoRun, so this calls the jobs endpoint, which
+# queues due schedules (handleSchedules) and then runs them. Auth is the
+# CRON_SECRET bearer checked in src/payload.config.ts.
+#
+# GitHub runs schedules best-effort: expect 5–15 minutes of lag, so an
+# article set for 09:00 goes out by roughly 09:15.
+name: Scheduled publish
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run-jobs:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Run scheduled-publish queue
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          SITE_URL: ${{ vars.SITE_URL }}
+        run: |
+          curl -fsS --retry 3 -m 60 \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            "${SITE_URL:-https://karaktermedia.com}/api/payload-jobs/run?queue=scheduled-publish&limit=10" \
+            -o /dev/null -w 'HTTP %{http_code}\n'

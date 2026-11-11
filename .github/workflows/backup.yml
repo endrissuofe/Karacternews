@@ -1,0 +1,28 @@
+# Nightly database backup to R2 for the Vercel + Neon host (ADR-0006).
+# Same script as the VPS cron (infra/scripts/backup.sh) in its
+# BACKUP_DATABASE_URL mode, so prune rules and healthcheck pings match.
+#
+# GitHub disables scheduled workflows after 60 days without repository
+# activity. BACKUP_HEALTHCHECK_URL is what notices that: no ping, alert.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: '15 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dump Neon and upload to R2
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_ENDPOINT: ${{ secrets.R2_ENDPOINT }}
+          R2_BUCKET: ${{ vars.R2_BUCKET }}
+          BACKUP_HEALTHCHECK_URL: ${{ secrets.BACKUP_HEALTHCHECK_URL }}
+        run: bash infra/scripts/backup.sh

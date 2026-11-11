@@ -57,6 +57,10 @@ if (!r2Configured && process.env.REQUIRE_R2 === 'true') {
 const storagePlugins: Plugin[] = r2Configured
   ? [
       s3Storage({
+        // Browser uploads straight to R2 via presigned URLs. Required on
+        // Vercel, whose functions reject request bodies over 4.5 MB (podcast
+        // audio, large photos). Needs a CORS rule on the bucket (ADR-0006).
+        clientUploads: true,
         collections: {
           media: {
             prefix: 'media',
