@@ -62,9 +62,10 @@ jobs:
   # The image carries no secrets — the Dockerfile is multi-stage and the
   # runner stage copies only build output, and the build-time credentials
   # below are throwaway, exactly as in the build job above.
+  # Builds the image on every run so a broken Dockerfile fails the PR;
+  # only a push to main logs in to GHCR and publishes it.
   publish-image:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     permissions:
@@ -112,6 +113,7 @@ jobs:
         run: pnpm payload migrate
 
       - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -139,6 +141,7 @@ jobs:
             .
 
       - name: Push image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: docker push --all-tags "${{ steps.img.outputs.name }}"
 
       - name: Report image size
