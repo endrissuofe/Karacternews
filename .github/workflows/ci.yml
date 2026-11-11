@@ -62,9 +62,12 @@ jobs:
   # The image carries no secrets — the Dockerfile is multi-stage and the
   # runner stage copies only build output, and the build-time credentials
   # below are throwaway, exactly as in the build job above.
+  # Runs on PRs as well as main: the image BUILD is validated everywhere, and
+  # only the PUSH is gated on main. The first version gated the whole job on
+  # main, so the Dockerfile was unverified until after a merge — and it failed
+  # there, leaving main unable to produce a deployable image.
   publish-image:
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     permissions:
@@ -112,6 +115,7 @@ jobs:
         run: pnpm payload migrate
 
       - name: Log in to GitHub Container Registry
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -138,8 +142,11 @@ jobs:
             --tag "${{ steps.img.outputs.name }}:${{ github.sha }}" \
             .
 
-      - name: Push image
-        run: docker push --all-tags "${{ steps.img.outputs.name }}"
-
       - name: Report image size
         run: docker images "${{ steps.img.outputs.name }}" --format '{{.Repository}}:{{.Tag}} {{.Size}}'
+
+      # Only main publishes. On a PR the job stops here, having proved the
+      # image builds.
+      - name: Push image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: docker push --all-tags "${{ steps.img.outputs.name }}"

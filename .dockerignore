@@ -1,0 +1,37 @@
+# Keep the Docker build context small and correct.
+#
+# This file's absence caused the first publish-image failure: the Dockerfile's
+# builder stage does `COPY --from=deps /app/node_modules` and then `COPY . .`,
+# so a node_modules present on the host was copied straight over the one
+# installed inside the image. That host copy carries pnpm metadata pointing at
+# a different store, so pnpm's deps-status check decided it had to purge
+# node_modules and aborted with ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY
+# (a Docker build has no TTY to confirm at).
+#
+# It also keeps ~1 GB out of the context, which is most of the build time.
+
+# Dependencies and build output — always provided inside the image
+node_modules
+.next
+out
+
+# Never put secrets in a build context
+.env
+.env.*
+!.env.example
+test.env
+
+# Not needed to build
+.git
+.gitignore
+.github
+docs
+tests
+playwright-report
+test-results
+coverage
+*.log
+*.report.html
+.vscode
+.idea
+.DS_Store
