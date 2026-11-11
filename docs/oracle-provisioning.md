@@ -59,29 +59,50 @@ Compute → Instances → Create:
 
 | Setting | Value |
 |---|---|
-| Shape | `VM.Standard.A1.Flex` |
-| OCPUs / Memory | 2 / 12 GB — the whole Always Free ARM allowance |
-| Image | Ubuntu 22.04 or 24.04 (ARM build) |
+Per **ADR-0005** we use the AMD shape, because ARM A1 capacity proved
+unobtainable in the home region.
+
+| Setting | Value |
+|---|---|
+| Shape | `VM.Standard.E2.1.Micro` (AMD, x86_64) |
+| OCPUs / Memory | 1 / 1 GB — fixed for this shape |
+| Image | Ubuntu 22.04 or 24.04 (**x86_64**, not ARM) |
 | Boot volume | 50 GB default (200 GB free total, shared with block volumes) |
 | SSH key | Upload one, or let Oracle generate and **download it** |
 
-The allowance is published as 1,500 OCPU-hours and 9,000 GB-hours per
-month, which is 2 OCPU / 12 GB run continuously. You can instead split it
-into two 1-OCPU instances, but for this stack use it all in one.
+Always Free includes **two** of these. Provision one now; the second is
+the escape hatch for moving Postgres off the box if memory gets tight.
 
-**Expect "Out of host capacity."** This is the single most common Oracle
-obstacle, not a mistake on your part. If it happens:
-
-- Retry at off-peak hours for your region
-- Try a different availability domain if your region has several
-- Drop to 1 OCPU / 6 GB, which is often available when the full 2/12 isn't
-  (tight for an on-box `next build` — build in CI if you end up here)
-- If it persists for days, fall back per ADR-0004 rather than waiting
+If you still see **"Out of host capacity"** on this shape too, try a
+different availability domain within your region. The AMD micro is far
+more widely available than ARM A1, so this is unlikely.
 
 **Guard against idle reclamation.** Oracle may reclaim an Always Free
 instance that, over 7 days, shows 95th-percentile CPU under 20%, network
 under 20% and memory under 20%. A quiet news site can hit all three. The
 uptime monitoring in step 9 is the mitigation — treat it as required.
+
+## 2b. Add swap — do this before deploying
+
+1 GB is tight. Expected steady state is roughly 250–400 MB app, 50–100 MB
+Postgres, 20 MB Caddy and 100–200 MB host. Swap is **required**, not
+optional, and block storage is free up to 200 GB:
+
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+free -h
+```
+
+Lower the swappiness so the kernel prefers RAM but still has the cushion:
+
+```bash
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swap.conf
+sudo sysctl --system
+```
 
 ## 3. Open the firewall — **both** layers
 
@@ -115,7 +136,7 @@ sudo apt-get update && sudo apt-get install -y ca-certificates curl gnupg awscli
 sudo install -m 0755 -d /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
   | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo "deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.gpg] \
+echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] \
 https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
   | sudo tee /etc/apt/sources.list.d/docker.list
 sudo apt-get update
@@ -155,7 +176,7 @@ Fill in `.env`. None of these survive on the old box, so regenerate:
 Start Postgres alone, then load the dump **before** the app starts:
 
 ```bash
-docker compose -f infra/docker-compose.prod.yml --env-file .env up -d postgres
+docker compose -f infra/docker-compose.micro.yml --env-file .env up -d postgres
 
 # Pull the dump from R2 (aws cli installed in step 4)
 AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_KEY" \
@@ -163,26 +184,52 @@ AWS_ACCESS_KEY_ID="$R2_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$R2_SECRET_ACCESS_K
   --endpoint-url "$R2_ENDPOINT" --region auto
 
 gunzip -c karacter-20261023-021501.sql.gz \
-  | docker compose -f infra/docker-compose.prod.yml --env-file .env \
+  | docker compose -f infra/docker-compose.micro.yml --env-file .env \
       exec -T postgres psql -U karacter -d karacter
 ```
 
 Sanity check before continuing — this should print roughly 30:
 
 ```bash
-docker compose -f infra/docker-compose.prod.yml --env-file .env \
+docker compose -f infra/docker-compose.micro.yml --env-file .env \
   exec -T postgres psql -U karacter -d karacter \
   -c "select count(*) from articles where status = 'published';"
 ```
 
 ## 7. Deploy
 
+**Prerequisite: the image must exist.** CI builds and pushes it on push to
+`main`, so merge your branch to `main` first and let the `publish-image`
+job finish. Check the Actions tab — without a published image there is
+nothing to pull.
+
 ```bash
-bash infra/scripts/deploy.sh
+bash infra/scripts/deploy-micro.sh
 ```
 
-This runs migrations, builds the app, and starts Caddy. The build is the
-heavy step — it has ample room on 12 GB, unlike the old box.
+This pulls the prebuilt image, starts Postgres, then brings up the app and
+Caddy. It **never builds** — `next build` does not fit in 1 GB, which is
+the whole reason CI builds it (ADR-0005).
+
+No `--migrate` on a fresh restore: the dump you just loaded already carries
+the schema. You only need `bash infra/scripts/deploy-micro.sh --migrate`
+when `src/migrations` has changed.
+
+If the pull fails with a permissions error, the GHCR package is private.
+Either set the package to public in GitHub (the image contains no secrets
+— the Dockerfile's `runner` stage copies only build output, and CI builds
+with throwaway credentials), or log the box in with a read-only token:
+
+```bash
+echo "<github-pat-with-read:packages>" | docker login ghcr.io -u <username> --password-stdin
+```
+
+**Rolling back** is a tag change, which is a side benefit of CI builds:
+
+```bash
+IMAGE=ghcr.io/endrissuofe/karacternews:<commit-sha> \
+  docker compose -f infra/docker-compose.micro.yml --env-file .env up -d app
+```
 
 ## 8. DNS cutover
 
