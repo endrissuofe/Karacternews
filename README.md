@@ -42,7 +42,7 @@ Mobile-first multimedia news platform built with **Next.js (App Router) + Payloa
 
 4. **Seed sample content (optional)**
 
-   From the admin dashboard, click **"Seed your database"** — this populates a few categories, a couple of tags, one demo author, and 3-4 sample articles so the reader pages have real content to show. See `src/endpoints/seed/index.ts`.
+   Set `ALLOW_SEED=true` in your local `.env`, restart `pnpm dev`, then log in as an admin and click **"Seed your database"** on the dashboard. This populates a few categories, a couple of tags, one demo author, and 3-4 sample articles. **It first deletes every article, category and tag**, which is why it is off by default and must never be enabled on a deployed site. See `src/endpoints/seed/index.ts`.
 
 ## Data model
 

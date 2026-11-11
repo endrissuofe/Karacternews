@@ -7,6 +7,10 @@ import './index.scss'
 const baseClass = 'before-dashboard'
 
 const BeforeDashboard: React.FC = () => {
+  // Seeding wipes all articles, so the button only exists where the seed
+  // route is enabled (ALLOW_SEED=true, local dev only).
+  const seedEnabled = process.env.ALLOW_SEED === 'true'
+
   return (
     <div className={baseClass}>
       <Banner className={`${baseClass}__banner`} type="success">
@@ -14,14 +18,16 @@ const BeforeDashboard: React.FC = () => {
       </Banner>
       Here&apos;s what to do next:
       <ul className={`${baseClass}__instructions`}>
-        <li>
-          <SeedButton />
-          {' with a few categories, tags, and sample articles to jump-start your new site, then '}
-          <a href="/" target="_blank">
-            visit your website
-          </a>
-          {' to see the results.'}
-        </li>
+        {seedEnabled && (
+          <li>
+            <SeedButton />
+            {' with a few categories, tags, and sample articles to jump-start your new site, then '}
+            <a href="/" target="_blank">
+              visit your website
+            </a>
+            {' to see the results.'}
+          </li>
+        )}
         <li>
           {'Modify your '}
           <a

@@ -3,16 +3,25 @@ import { seed } from '@/endpoints/seed'
 import config from '@payload-config'
 import { headers } from 'next/headers'
 
+import type { User } from '@/payload-types'
+
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
+// The seed DELETES every article, category and tag before inserting demo
+// content. It must never be reachable on a live site: it is off unless
+// ALLOW_SEED=true (set only in a local .env), and even then admin-only.
 export async function POST(): Promise<Response> {
+  if (process.env.ALLOW_SEED !== 'true') {
+    return new Response('Not found.', { status: 404 })
+  }
+
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
 
   // Authenticate by passing request headers
   const { user } = await payload.auth({ headers: requestHeaders })
 
-  if (!user) {
+  if (!user || (user as User).role !== 'admin') {
     return new Response('Action forbidden.', { status: 403 })
   }
 
