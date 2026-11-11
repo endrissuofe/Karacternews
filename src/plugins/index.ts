@@ -41,6 +41,19 @@ const generateURL: GenerateURL<Article | Page> = ({ doc }) => {
 // those old files 404 (Payload serves via the adapter) — re-run the seed.
 const r2Configured = Boolean(process.env.R2_BUCKET && process.env.R2_ENDPOINT)
 
+// The fallback above is deliberate for dev and CI, but on a real deployment
+// it is a silent data-loss path: uploads land on container-local disk and
+// disappear with the container, with nothing logged. Set REQUIRE_R2=true in
+// the server's .env so a missing/typo'd R2 var fails the boot loudly instead.
+// (Keyed on its own flag rather than NODE_ENV because CI builds in
+// production mode without R2 credentials.)
+if (!r2Configured && process.env.REQUIRE_R2 === 'true') {
+  throw new Error(
+    'REQUIRE_R2=true but R2_BUCKET/R2_ENDPOINT are unset — refusing to start ' +
+      'with local media storage, which would lose uploads on the next deploy.',
+  )
+}
+
 const storagePlugins: Plugin[] = r2Configured
   ? [
       s3Storage({
