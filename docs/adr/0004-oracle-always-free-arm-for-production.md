@@ -53,11 +53,19 @@ framing, now actually true.
   (`src/payload.config.ts:114`) keeps working because the box is always on;
   Caddy, compose, `deploy.sh` and `backup.sh` all run as-is; §3.3
   self-host/portability is preserved.
-- 4 OCPU / 24 GB available vs the CAX11's 2 vCPU / 4 GB — the on-box
-  `next build` that needed 3 GB of swap gets real headroom.
+- 2 OCPU / 12 GB available vs the CAX11's 2 vCPU / 4 GB — still 3× the
+  memory, so the on-box `next build` that needed 3 GB of swap gets real
+  headroom. (Oracle's allowance is stated as 1,500 OCPU-hours and 9,000
+  GB-hours per month, which is 2 OCPU / 12 GB run continuously. An earlier
+  draft of this ADR said 4 OCPU / 24 GB, which is no longer the allowance.)
 - **Accepted risks:** ARM capacity is frequently unavailable at
-  provisioning time; Oracle may reclaim idle Always Free compute; signup
-  requires card verification that often rejects Nigerian cards.
+  provisioning time; signup requires card verification that often rejects
+  Nigerian cards; and Oracle may reclaim idle Always Free compute, defined
+  as a 7-day period with 95th-percentile CPU below 20%, network below 20%
+  and (on A1 shapes) memory below 20%. A low-traffic news site can plausibly
+  sit under all three, so this is a live risk rather than a theoretical one
+  — which is precisely why the uptime monitoring below is mandatory, not
+  optional. Oracle does not state what notice precedes reclamation.
 - **Required mitigations** (shipped with this ADR, not optional):
   - `backup.sh` pings healthchecks.io on success and `/fail` on failure, so
     a backup that stops running alerts instead of going quiet

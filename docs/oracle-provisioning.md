@@ -10,15 +10,48 @@ with `psql`** — budget ten minutes at a computer for that one.
 
 ## 1. Signup
 
-Oracle Cloud → Always Free. Two things reliably go wrong:
+Go to **signup.oraclecloud.com**. Note that Oracle presents this as a
+30-day free trial *with credits*; Always Free is what remains once the
+trial lapses. That is the normal route in — you are not signing up for
+the wrong thing.
 
-- **Card verification.** A card is required even though Always Free
-  resources are never charged (expect a ~$1 hold, refunded). Nigerian
-  debit cards are frequently rejected — a virtual dollar card from a
-  Nigerian fintech usually clears it.
-- **Home region is permanent.** You cannot change it later, and ARM
-  capacity varies a lot by region. Pick a less-contested region rather
-  than the closest one; latency is handled by Cloudflare anyway.
+1. **Country and name**, then an email. Oracle allows **one cloud account
+   per email address**, so pick the one you want permanently. Complete the
+   CAPTCHA and choose "Verify my email".
+2. **Verify the email.** Subject line "Confirm your Oracle cloud account".
+   The link **expires in 30 minutes** — if you miss that window, restart.
+3. **Password.** 8–40 characters, needing a lowercase, an uppercase, a
+   number and a special character. It cannot contain your first name, last
+   name or email, spaces, or any of `` ` ~ < > \ ``.
+4. **Cloud account name** (identifies the tenancy) and, optionally, a
+   company name.
+5. **Home region — this is the one irreversible choice.** It cannot be
+   changed after signup, and Always Free compute *and* block volumes must
+   live in it. Volumes created elsewhere are billed normally.
+6. Accept the Terms of Use, then enter **address and phone number**.
+7. **Payment verification** → "Credit Card". Oracle accepts debit cards
+   carrying a Visa, Mastercard, Discover or Amex logo **provided they do
+   not require a PIN**. Expect a small temporary verification hold, removed
+   automatically; Oracle states the card is not charged unless you
+   explicitly upgrade to a paid account. No hold amount is published.
+8. Accept terms, "Start my free trial", and you land in the OCI Console.
+
+**Choosing the home region.** ARM capacity varies enormously by region and
+this choice is permanent, so weigh it properly. Heavily contested regions
+(Frankfurt, London, Ashburn, Phoenix) are where "Out of host capacity" is
+worst. Latency to Nigeria barely matters here because Cloudflare fronts the
+origin — so optimise for capacity, not proximity.
+
+**If the card is rejected.** Common and usually not your fault:
+
+- Use a virtual USD card from a Nigerian fintech; it must support
+  international transactions and not require a PIN
+- The cardholder name should match the account name
+- **Do not sign up over a VPN** — it reliably trips fraud detection
+- Oracle's docs note that in some countries online signup is unavailable
+  and you must contact Oracle Sales. Nigeria is not named either way, so
+  if you're repeatedly blocked with a vague error, that's the escalation
+  path rather than endless retries
 
 ## 2. Provision the ARM instance
 
@@ -27,18 +60,28 @@ Compute → Instances → Create:
 | Setting | Value |
 |---|---|
 | Shape | `VM.Standard.A1.Flex` |
-| OCPUs / Memory | 4 / 24 GB (the whole free allowance) |
+| OCPUs / Memory | 2 / 12 GB — the whole Always Free ARM allowance |
 | Image | Ubuntu 22.04 or 24.04 (ARM build) |
-| Boot volume | 50–100 GB (200 GB free total) |
+| Boot volume | 50 GB default (200 GB free total, shared with block volumes) |
 | SSH key | Upload one, or let Oracle generate and **download it** |
+
+The allowance is published as 1,500 OCPU-hours and 9,000 GB-hours per
+month, which is 2 OCPU / 12 GB run continuously. You can instead split it
+into two 1-OCPU instances, but for this stack use it all in one.
 
 **Expect "Out of host capacity."** This is the single most common Oracle
 obstacle, not a mistake on your part. If it happens:
 
 - Retry at off-peak hours for your region
 - Try a different availability domain if your region has several
-- Reduce to 2 OCPU / 12 GB, which is often available when 4/24 isn't
+- Drop to 1 OCPU / 6 GB, which is often available when the full 2/12 isn't
+  (tight for an on-box `next build` — build in CI if you end up here)
 - If it persists for days, fall back per ADR-0004 rather than waiting
+
+**Guard against idle reclamation.** Oracle may reclaim an Always Free
+instance that, over 7 days, shows 95th-percentile CPU under 20%, network
+under 20% and memory under 20%. A quiet news site can hit all three. The
+uptime monitoring in step 9 is the mitigation — treat it as required.
 
 ## 3. Open the firewall — **both** layers
 
