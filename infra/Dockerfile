@@ -31,6 +31,12 @@ ENV DATABASE_URL=$DATABASE_URL \
     NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL \
     BUILD_STANDALONE=1 \
     NODE_OPTIONS=--no-deprecation
+
+# A Docker build has no TTY, so any pnpm prompt is a hard failure.
+# .dockerignore is what actually keeps the host's node_modules out of the
+# context (that mismatch is why pnpm wanted to purge here); this is the
+# belt-and-braces so a prompt can never block the build again.
+ENV CI=true
 RUN pnpm build
 
 # --- runtime ---
