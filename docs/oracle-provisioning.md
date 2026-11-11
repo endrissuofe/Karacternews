@@ -182,7 +182,7 @@ bash infra/scripts/deploy.sh
 ```
 
 This runs migrations, builds the app, and starts Caddy. The build is the
-heavy step — it has ample room on 24 GB, unlike the old box.
+heavy step — it has ample room on 12 GB, unlike the old box.
 
 ## 8. DNS cutover
 
