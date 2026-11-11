@@ -7,6 +7,13 @@ import { getServerSideURL } from '@/utilities/getURL'
 
 // Native Next.js sitemap route — served at /sitemap.xml. Works in `pnpm dev`
 // too (no postbuild step required), unlike the old next-sitemap setup.
+
+// Metadata routes are statically generated at build time by default, which
+// pinned this sitemap to whatever articles existed when the image was built
+// (in production: the four seed articles). ISR keeps it current; the publish
+// hook also revalidates this path for an immediate refresh.
+export const revalidate = 600
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const payload = await getPayload({ config: configPromise })
   const siteUrl = getServerSideURL()

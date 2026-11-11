@@ -41,7 +41,11 @@ const getNewsSitemap = unstable_cache(
       }))
   },
   ['news-sitemap'],
-  { tags: ['news-sitemap'] },
+  // `revalidate` is required, not just belt-and-braces: the 48-hour window
+  // above is time-based, so entries must expire as they age even when
+  // nothing is published. A tag-only cache has no time component and
+  // froze this feed on its first render.
+  { tags: ['news-sitemap'], revalidate: 600 },
 )
 
 function escapeXml(value: string) {
