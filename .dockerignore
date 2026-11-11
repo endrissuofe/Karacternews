@@ -1,0 +1,22 @@
+# Keep the build context to source only. Without this, `COPY . .` in the
+# builder stage overwrote the deps stage's Alpine node_modules with the
+# host's (glibc) one, and pnpm 11 aborted the build trying to purge it.
+node_modules
+.next
+.git
+.github
+.claude
+.vscode
+.env
+.env.*
+!.env.example
+test.env
+docs
+backups
+coverage
+test-results
+playwright-report
+*.log
+*.report.html
+lighthouse-*.html
+tsconfig.tsbuildinfo
