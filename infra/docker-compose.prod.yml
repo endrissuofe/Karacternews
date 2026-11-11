@@ -49,8 +49,11 @@ services:
       R2_BUCKET: ${R2_BUCKET}
       R2_ENDPOINT: ${R2_ENDPOINT}
     volumes:
-      # Article images use local storage until their own R2 migration —
-      # persist them across container rebuilds.
+      # Stale note removed: images DO go to R2 (src/plugins/index.ts covers
+      # both `media` and `podcast-audio`), confirmed against the live bucket.
+      # The volume stays as a safety net for pre-R2 legacy files and so a
+      # misconfigured deploy doesn't write uploads into the container layer.
+      # REQUIRE_R2=true is what actually guarantees R2 is in use.
       - karacter_media:/app/public/media
 
   caddy:

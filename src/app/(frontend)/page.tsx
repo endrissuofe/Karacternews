@@ -16,6 +16,16 @@ import { getPublicAuthorById } from '@/utilities/getPublicAuthor'
 import { getServerSideURL } from '@/utilities/getURL'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
+// A news homepage must not be frozen at build time. Without this it was
+// fully static, so it only ever changed when revalidateArticle fired
+// revalidatePath('/') — anything else (SiteSettings featured slots, a
+// scheduled publish that didn't revalidate) left it stale indefinitely.
+// It also breaks CI-built images: the image is built against a throwaway
+// empty database, so a build-time-frozen homepage would ship empty.
+// ISR regenerates it against the real database shortly after deploy; the
+// publish hook still refreshes it immediately.
+export const revalidate = 300
+
 export default async function HomePage() {
   const payload = await getPayload({ config: configPromise })
 
