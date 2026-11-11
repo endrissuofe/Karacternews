@@ -17,8 +17,11 @@ rejecting Vercel, which they all listed as the fallback.
 ## Decision
 
 - **App:** Vercel, **Hobby plan now**, region `fra1`. Production deploys
-  only; preview builds are skipped (`vercel.json` `ignoreCommand`) because
-  they would run against the production database.
+  only: preview deployments are disabled in the project settings, and every
+  database and storage variable is scoped to Production, so a branch build
+  can never run migrations against the live database. (An `ignoreCommand`
+  checking `VERCEL_ENV` was tried first; Vercel cancelled git-triggered
+  production builds with it, so it was removed.)
 - **Database:** Neon free Postgres (Frankfurt), pooled connection string.
   Restored from `backups/karacter-20261023-021501.sql.gz`.
 - **Media:** unchanged, Cloudflare R2. Uploads go **browser → R2** via
