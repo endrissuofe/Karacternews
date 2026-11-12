@@ -19,12 +19,26 @@ import { SiteSettings } from './SiteSettings/config'
 import { plugins } from './plugins'
 import { publishScheduledArticles } from './jobs/publishScheduledArticles'
 import { defaultLexical } from '@/fields/defaultLexical'
+import { brevoAdapter } from './email/brevoAdapter'
 import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+// Email (password resets) goes through Brevo once both the API key and a
+// sender verified in Brevo are set. Until then Payload falls back to logging
+// emails to the console, so nothing breaks while it is not configured.
+const email =
+  process.env.BREVO_API_KEY && process.env.EMAIL_FROM_ADDRESS
+    ? brevoAdapter({
+        apiKey: process.env.BREVO_API_KEY,
+        defaultFromAddress: process.env.EMAIL_FROM_ADDRESS,
+        defaultFromName: process.env.EMAIL_FROM_NAME || 'Karacter Media',
+      })
+    : undefined
+
 export default buildConfig({
+  email,
   admin: {
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
