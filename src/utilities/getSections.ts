@@ -2,7 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 
-export type SectionLink = { name: string; slug: string }
+export type SectionLink = { id: number; name: string; slug: string }
 
 // Top-level categories for the section bar and the footer. Cached with a
 // tag so the Categories hooks can refresh it at once; `revalidate` is the
@@ -24,8 +24,10 @@ export const getSections = unstable_cache(
 
     return result.docs
       .filter((category) => Boolean(category.slug))
-      .map((category) => ({ name: category.name, slug: category.slug as string }))
+      .map((category) => ({ id: category.id, name: category.name, slug: category.slug as string }))
   },
-  ['sections-nav'],
+  // Key is versioned: Vercel's data cache outlives a deploy, so entries
+  // cached before `id` was added must not be served to code that needs it.
+  ['sections-nav-v2'],
   { tags: ['sections-nav'], revalidate: 600 },
 )
