@@ -37,6 +37,17 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    // The admin panel has its own <head>; without this its tab shows
+    // Payload's icon instead of the Karacter monogram.
+    meta: {
+      icons: {
+        icon: [
+          { url: '/favicon.ico', sizes: '32x32' },
+          { url: '/favicon.svg', type: 'image/svg+xml' },
+        ],
+        apple: [{ url: '/apple-touch-icon.png' }],
+      },
+    },
     user: Users.slug,
     livePreview: {
       breakpoints: [
