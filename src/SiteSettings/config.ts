@@ -2,6 +2,8 @@ import type { GlobalConfig } from 'payload'
 
 import { isEditorOrAdmin } from '@/access/isEditorOrAdmin'
 
+import { revalidateSiteSettings } from './hooks/revalidateSiteSettings'
+
 // Per CLAUDE.md §6 SiteSettings global: site name, logo, social links,
 // homepage featured slots. Primary nav is intentionally left to the
 // existing `header`/`footer` globals (already wired into working nav
@@ -89,4 +91,7 @@ export const SiteSettings: GlobalConfig = {
       ],
     },
   ],
+  hooks: {
+    afterChange: [revalidateSiteSettings],
+  },
 }
