@@ -33,6 +33,12 @@ export default buildConfig({
       // The `BeforeDashboard` component renders the 'welcome' block that you see after logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below.
       beforeDashboard: ['@/components/BeforeDashboard'],
+      // Karacter branding in place of Payload's logo (login screen) and icon
+      // (admin navigation).
+      graphics: {
+        Icon: '@/components/AdminBranding/Icon',
+        Logo: '@/components/AdminBranding/Logo',
+      },
     },
     importMap: {
       baseDir: path.resolve(dirname),
@@ -40,6 +46,8 @@ export default buildConfig({
     // The admin panel has its own <head>; without this its tab shows
     // Payload's icon instead of the Karacter monogram.
     meta: {
+      // Browser tab title in the admin, e.g. "Dashboard - Karacter Media".
+      titleSuffix: ' - Karacter Media',
       icons: {
         icon: [
           { url: '/favicon.ico', sizes: '32x32' },
