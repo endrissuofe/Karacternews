@@ -2,11 +2,14 @@ import type { Metadata } from 'next'
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
-import Link from 'next/link'
 import React from 'react'
 
-import { CollectionArchive } from '@/components/CollectionArchive'
-import type { CardPostData } from '@/components/Card'
+import { PageHeader } from '@/components/PageHeader'
+import { Pager } from '@/components/Pager'
+import { SearchForm } from '@/components/SearchForm'
+import { SectionChips } from '@/components/SectionChips'
+import { StoryRow } from '@/components/story/StoryRow'
+import type { StoryData } from '@/components/story/shared'
 import { searchArticleIds, type SearchSort } from '@/utilities/searchArticles'
 
 const PAGE_SIZE = 12
@@ -42,7 +45,7 @@ export default async function SearchPage({ searchParams: searchParamsPromise }: 
     ? categories.docs.find((c) => c.slug === categorySlug) || null
     : null
 
-  let results: { docs: CardPostData[]; totalDocs: number; totalPages: number } = {
+  let results: { docs: StoryData[]; totalDocs: number; totalPages: number } = {
     docs: [],
     totalDocs: 0,
     totalPages: 1,
@@ -71,9 +74,7 @@ export default async function SearchPage({ searchParams: searchParamsPromise }: 
       })
       const byId = new Map(found.docs.map((d) => [String(d.id), d]))
       results = {
-        docs: ids
-          .map((id) => byId.get(String(id)))
-          .filter(Boolean) as unknown as CardPostData[],
+        docs: ids.map((id) => byId.get(String(id))).filter(Boolean) as unknown as StoryData[],
         totalDocs,
         totalPages,
       }
@@ -91,104 +92,93 @@ export default async function SearchPage({ searchParams: searchParamsPromise }: 
     return s ? `/search?${s}` : '/search'
   }
 
+  const selectClass =
+    'rounded-md border border-border bg-background px-2.5 py-2 font-mono text-[11px] uppercase tracking-wider text-foreground focus:border-foreground focus:outline-none focus:ring-2 focus:ring-ring'
+
   return (
     <main className="pb-16 pt-8">
-      <div className="container mb-8">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
-          Search
-        </h1>
+      <PageHeader
+        kicker="Search"
+        meta={
+          q
+            ? `${results.totalDocs} ${results.totalDocs === 1 ? 'result' : 'results'}${
+                activeCategory ? ` in ${activeCategory.name}` : ''
+              }`
+            : undefined
+        }
+        title={q ? `\u201c${q}\u201d` : 'Search'}
+      >
+        <SearchForm className="mt-5" defaultValue={q}>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <label className="sr-only" htmlFor="search-category">
+              Section
+            </label>
+            <select
+              className={selectClass}
+              defaultValue={categorySlug}
+              id="search-category"
+              name="category"
+            >
+              <option value="">All sections</option>
+              {categories.docs.map((c) => (
+                <option key={c.id} value={c.slug ?? ''}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <label className="sr-only" htmlFor="search-sort">
+              Sort
+            </label>
+            <select className={selectClass} defaultValue={sort} id="search-sort" name="sort">
+              <option value="relevance">Most relevant</option>
+              <option value="newest">Newest first</option>
+            </select>
+          </div>
+        </SearchForm>
+      </PageHeader>
 
-        {/* Plain GET form — works without JavaScript (§3.7 minimal JS). */}
-        <form action="/search" method="get" className="mt-5 flex max-w-2xl flex-wrap gap-2">
-          <label htmlFor="search-q" className="sr-only">
-            Search articles
-          </label>
-          <input
-            id="search-q"
-            name="q"
-            type="search"
-            defaultValue={q}
-            placeholder="Search stories…"
-            className="min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 font-serif text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-          />
-          <label htmlFor="search-category" className="sr-only">
-            Category
-          </label>
-          <select
-            id="search-category"
-            name="category"
-            defaultValue={categorySlug}
-            className="rounded-md border border-border bg-background px-2 py-2 font-mono text-[11px] uppercase tracking-wider text-foreground"
-          >
-            <option value="">All categories</option>
-            {categories.docs.map((c) => (
-              <option key={c.id} value={c.slug ?? ''}>
-                {c.name}
-              </option>
+      {/* Results read as a list, not a grid: one story per line with its
+          summary, so a reader can scan headlines down a single column. */}
+      {q && results.docs.length > 0 && (
+        <div className="container">
+          <ul className="max-w-3xl divide-y divide-border">
+            {results.docs.map((story) => (
+              <li key={story.id} className="py-5 first:pt-0">
+                <StoryRow headingLevel="h2" showExcerpt="desktop" story={story} />
+              </li>
             ))}
-          </select>
-          <label htmlFor="search-sort" className="sr-only">
-            Sort
-          </label>
-          <select
-            id="search-sort"
-            name="sort"
-            defaultValue={sort}
-            className="rounded-md border border-border bg-background px-2 py-2 font-mono text-[11px] uppercase tracking-wider text-foreground"
-          >
-            <option value="relevance">Relevance</option>
-            <option value="newest">Newest</option>
-          </select>
-          <button
-            type="submit"
-            className="rounded-md bg-ink px-4 py-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-paper hover:opacity-90"
-          >
-            Search
-          </button>
-        </form>
-
-        {q && (
-          <p className="mt-4 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-            {results.totalDocs} {results.totalDocs === 1 ? 'result' : 'results'} for “{q}”
-            {activeCategory ? ` in ${activeCategory.name}` : ''}
-          </p>
-        )}
-      </div>
-
-      {q && results.docs.length > 0 && <CollectionArchive posts={results.docs} />}
+          </ul>
+        </div>
+      )}
 
       {q && results.docs.length === 0 && (
-        <div className="container font-serif text-foreground">
-          No stories matched your search. Try different keywords, or drop the category filter.
+        <div className="container">
+          <div className="max-w-2xl">
+            <p className="font-serif text-lg leading-relaxed text-foreground">
+              No stories matched your search. Try fewer or different words
+              {activeCategory ? ', or search all sections' : ''}.
+            </p>
+            <div className="mt-8">
+              <SectionChips />
+            </div>
+          </div>
         </div>
       )}
 
       {!q && (
-        <div className="container font-serif text-muted-foreground">
-          Type something above to search every published story.
+        <div className="container">
+          <div className="max-w-2xl">
+            <p className="font-serif text-lg leading-relaxed text-muted-foreground">
+              Search every published story by headline, summary or text.
+            </p>
+            <div className="mt-8">
+              <SectionChips />
+            </div>
+          </div>
         </div>
       )}
 
-      {q && results.totalPages > 1 && (
-        <div className="container mt-10 flex gap-6">
-          {page > 1 && (
-            <Link
-              href={buildQuery(page - 1)}
-              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
-            >
-              ← Previous
-            </Link>
-          )}
-          {page < results.totalPages && (
-            <Link
-              href={buildQuery(page + 1)}
-              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
-            >
-              Next →
-            </Link>
-          )}
-        </div>
-      )}
+      {q && <Pager hrefFor={buildQuery} page={page} totalPages={results.totalPages} />}
     </main>
   )
 }

@@ -24,7 +24,7 @@ export const ShareRow: React.FC<{ title: string; url: string }> = ({ title, url 
   }
 
   const circle =
-    'flex h-9 w-9 items-center justify-center rounded-full bg-surface text-ink transition-colors hover:bg-ink hover:text-paper'
+    'flex h-9 w-9 items-center justify-center rounded-full bg-muted text-foreground transition-colors hover:bg-foreground hover:text-background'
 
   return (
     <div className="flex items-center gap-3.5 border-y border-border py-5">

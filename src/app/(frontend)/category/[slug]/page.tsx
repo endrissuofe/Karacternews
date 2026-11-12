@@ -3,11 +3,13 @@ import type { Metadata } from 'next'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import React from 'react'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
 import type { CardPostData } from '@/components/Card'
+import { PageHeader } from '@/components/PageHeader'
+import { Pager } from '@/components/Pager'
+import { SectionChips } from '@/components/SectionChips'
 import { LeadStory } from '@/components/story/LeadStory'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
@@ -56,14 +58,13 @@ export default async function CategoryPage({
 
   return (
     <main className="pb-16 pt-8">
-      <div className="container mb-8">
-        <h1 className="font-display text-3xl font-bold uppercase tracking-wide text-foreground md:text-4xl">
-          {category.name}
-        </h1>
-        <p className="mt-2 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-          {articles.totalDocs} {articles.totalDocs === 1 ? 'story' : 'stories'}
-        </p>
-      </div>
+      <PageHeader
+        kicker="Section"
+        meta={`${articles.totalDocs} ${articles.totalDocs === 1 ? 'story' : 'stories'}${
+          page > 1 ? ` \u00b7 page ${page}` : ''
+        }`}
+        title={category.name}
+      />
 
       {/* The first page opens with the section's newest story as its lead. */}
       {lead && (
@@ -79,29 +80,25 @@ export default async function CategoryPage({
       )}
 
       {articles.docs.length === 0 && (
-        <div className="container">No articles in this category yet.</div>
-      )}
-
-      {articles.totalPages > 1 && (
-        <div className="container mt-10 flex gap-6">
-          {page > 1 && (
-            <Link
-              href={`/category/${slug}?page=${page - 1}`}
-              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
-            >
-              ← Previous
-            </Link>
-          )}
-          {page < articles.totalPages && (
-            <Link
-              href={`/category/${slug}?page=${page + 1}`}
-              className="font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground hover:text-scarlet"
-            >
-              Next →
-            </Link>
-          )}
+        <div className="container">
+          <div className="max-w-2xl">
+            <p className="font-serif text-lg leading-relaxed text-foreground">
+              No stories in this section yet.
+            </p>
+            <div className="mt-8">
+              <SectionChips heading="Other sections" />
+            </div>
+          </div>
         </div>
       )}
+
+      <Pager
+        hrefFor={(p) => (p > 1 ? `/category/${slug}?page=${p}` : `/category/${slug}`)}
+        nextLabel="Older"
+        page={page}
+        previousLabel="Newer"
+        totalPages={articles.totalPages}
+      />
     </main>
   )
 }

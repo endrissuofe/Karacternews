@@ -81,7 +81,7 @@ export default async function PodcastEpisodePage({ params: paramsPromise }: Args
 
           <div className="mb-8 flex items-center gap-4">
             {cover && (
-              <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-surface">
+              <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
                 <Media fill imgClassName="object-cover" resource={cover} size="80px" />
               </div>
             )}

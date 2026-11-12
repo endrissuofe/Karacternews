@@ -187,7 +187,7 @@ export default async function ArticlePage({ params: paramsPromise }: Args) {
                 aria-label="About the author"
                 className="flex items-start gap-4 border-b border-border py-6"
               >
-                <div className="relative h-14 w-14 flex-none overflow-hidden rounded-full bg-surface">
+                <div className="relative h-14 w-14 flex-none overflow-hidden rounded-full bg-muted">
                   {avatar ? (
                     <Media fill imgClassName="object-cover" resource={avatar} size="56px" />
                   ) : (
