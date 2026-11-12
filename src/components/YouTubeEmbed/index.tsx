@@ -4,7 +4,7 @@ import React from 'react'
 // §5 exception (2026-07-12): embeds only — we never host or proxy video.
 export const YouTubeEmbed: React.FC<{ videoId: string; title: string }> = ({ videoId, title }) => {
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-surface">
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-muted">
       <iframe
         className="absolute inset-0 h-full w-full"
         src={`https://www.youtube-nocookie.com/embed/${videoId}`}

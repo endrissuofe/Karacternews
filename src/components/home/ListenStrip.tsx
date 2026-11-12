@@ -20,7 +20,10 @@ export const ListenStrip: React.FC<{ episodes: PodcastEpisode[] }> = ({ episodes
   if (playable.length === 0) return null
 
   return (
-    <section aria-label="Listen" className="surface-ink bg-ink py-10 text-paper">
+    <section
+      aria-label="Listen"
+      className="surface-ink bg-ink py-10 text-paper dark:border-y dark:border-border"
+    >
       <div className="container">
         <div className="mb-6 flex items-center gap-3">
           <span aria-hidden="true" className="h-2.5 w-2.5 rounded-full bg-amber" />

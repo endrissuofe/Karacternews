@@ -19,7 +19,7 @@ export const StoryImage: React.FC<{
   priority?: boolean
 }> = ({ image, className, size, priority }) => {
   return (
-    <div className={cn('relative overflow-hidden rounded-md bg-surface', className)}>
+    <div className={cn('relative overflow-hidden rounded-md bg-muted', className)}>
       {image ? (
         <Media fill imgClassName="object-cover" priority={priority} resource={image} size={size} />
       ) : (

@@ -100,7 +100,7 @@ export default async function PodcastsPage() {
               <article key={show.id} className="group">
                 <Link href={`/podcasts/${show.slug}`} className="block">
                   {cover && (
-                    <div className="relative mb-3 aspect-square overflow-hidden rounded-xl bg-surface">
+                    <div className="relative mb-3 aspect-square overflow-hidden rounded-xl bg-muted">
                       <Media
                         fill
                         imgClassName="object-cover"
