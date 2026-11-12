@@ -1,78 +1,60 @@
-'use client'
-import { cn } from '@/utilities/ui'
-import useClickableCard from '@/utilities/useClickableCard'
 import Link from 'next/link'
 import React from 'react'
 
 import type { Article } from '@/payload-types'
 
-import { Media } from '@/components/Media'
+import { StoryImage } from '@/components/story/StoryImage'
+import { kickerClass, metaClass, stretchedLink } from '@/components/story/shared'
 import { timeAgo } from '@/utilities/formatDateTime'
+import { cn } from '@/utilities/ui'
 
 export type CardPostData = Pick<
   Article,
   'slug' | 'category' | 'coverImage' | 'excerpt' | 'publishedAt' | 'seo' | 'title'
 >
 
+// The standard story card, used by every listing (sections, authors,
+// search, archive blocks). Flat: no border, shadow or lift.
+// One markup, two shapes: on a phone it is a row — text left, small
+// picture right — so a listing reads as a dense one-column list; from
+// `sm` up it stacks into a picture-over-text card for the grid.
 export const Card: React.FC<{
-  alignItems?: 'center'
   className?: string
   doc?: CardPostData
   relationTo?: 'articles'
   showCategories?: boolean
   title?: string
-}> = (props) => {
-  const { card, link } = useClickableCard({})
-  const { className, doc, showCategories, title: titleFromProps } = props
+}> = ({ className, doc, showCategories, title: titleFromProps }) => {
+  const { slug, category, coverImage, excerpt, publishedAt, seo, title } = doc || {}
 
-  const { slug, category, coverImage, publishedAt, seo, title } = doc || {}
-
-  const hasCategory = category && typeof category === 'object'
+  const categoryName = category && typeof category === 'object' ? category.name : null
   const titleToUse = titleFromProps || title
   const image =
     (coverImage && typeof coverImage === 'object' ? coverImage : null) ||
     (seo?.image && typeof seo.image === 'object' ? seo.image : null)
-  const href = `/article/${slug}`
 
   return (
-    <article
-      className={cn(
-        'group flex flex-col overflow-hidden rounded-xl bg-card ring-1 ring-border transition-all duration-200 hover:cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:ring-scarlet/40 motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-        className,
-      )}
-      ref={card.ref}
-    >
-      <div className="relative aspect-[4/3] overflow-hidden bg-surface">
-        {image && (
-          <Media
-            fill
-            imgClassName="object-cover transition-transform duration-300 group-hover:scale-[1.04] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-            resource={image}
-            size="50vw"
-          />
-        )}
-      </div>
-      <div className="flex flex-1 flex-col p-3 lg:p-4">
-        {showCategories && hasCategory && (
-          <p className="mb-1.5 font-mono text-[10px] font-semibold uppercase tracking-wider text-scarlet">
-            {category.name}
-          </p>
-        )}
+    <article className={cn('group relative flex gap-4 sm:flex-col sm:gap-0', className)}>
+      <StoryImage
+        className="order-last aspect-[4/3] w-28 shrink-0 self-start sm:order-none sm:mb-3 sm:aspect-[16/10] sm:w-full"
+        image={image}
+        size="(max-width: 640px) 112px, (max-width: 1024px) 50vw, 33vw"
+      />
+      <div className="min-w-0 flex-1">
+        {showCategories && categoryName && <p className={`mb-1 ${kickerClass}`}>{categoryName}</p>}
         {titleToUse && (
-          <h3 className="font-display text-[15px] font-semibold leading-snug text-card-foreground group-hover:underline lg:text-base">
-            <Link href={href} ref={link.ref}>
+          <h3 className="font-display text-lg font-semibold leading-snug text-foreground group-hover:underline sm:text-xl">
+            <Link className={stretchedLink} href={`/article/${slug}`}>
               {titleToUse}
             </Link>
           </h3>
         )}
-        {publishedAt && (
-          <p
-            className="mt-auto pt-2.5 font-mono text-[10px] uppercase tracking-wide text-muted-foreground"
-            suppressHydrationWarning
-          >
-            {timeAgo(publishedAt)}
+        {excerpt && (
+          <p className="mt-1.5 hidden font-serif text-sm leading-relaxed text-muted-foreground sm:line-clamp-2">
+            {excerpt}
           </p>
         )}
+        {publishedAt && <p className={`mt-2 ${metaClass}`}>{timeAgo(publishedAt)}</p>}
       </div>
     </article>
   )

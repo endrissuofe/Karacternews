@@ -1,36 +1,29 @@
-import { cn } from '@/utilities/ui'
 import React from 'react'
 
 import { Card, CardPostData } from '@/components/Card'
 
 export type Props = {
   posts: CardPostData[]
+  /** Hide the section label, e.g. on a section's own page */
+  showCategories?: boolean
 }
 
-export const CollectionArchive: React.FC<Props> = (props) => {
-  const { posts } = props
-
+// A listing of stories. Phones get a one-column list divided by hairlines;
+// wider screens get a two- then three-column grid of the same cards.
+export const CollectionArchive: React.FC<Props> = ({ posts, showCategories = true }) => {
   return (
-    <div className={cn('container')}>
-      <div>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-6 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-8 lg:gap-y-8">
-          {posts?.map((result, index) => {
-            if (typeof result === 'object' && result !== null) {
-              return (
-                <Card
-                  className="h-full"
-                  doc={result}
-                  key={index}
-                  relationTo="articles"
-                  showCategories
-                />
-              )
-            }
+    <div className="container">
+      <ul className="grid divide-y divide-border sm:grid-cols-2 sm:gap-x-8 sm:gap-y-10 sm:divide-y-0 lg:grid-cols-3">
+        {posts?.map((result, index) => {
+          if (typeof result !== 'object' || result === null) return null
 
-            return null
-          })}
-        </div>
-      </div>
+          return (
+            <li key={index} className="py-4 first:pt-0 sm:py-0">
+              <Card doc={result} relationTo="articles" showCategories={showCategories} />
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }

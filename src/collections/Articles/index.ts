@@ -62,6 +62,10 @@ export const Articles: CollectionConfig<'articles'> = {
       name: 'title',
       type: 'text',
       required: true,
+      admin: {
+        description:
+          'Write headlines in normal capitalisation, not ALL CAPITALS — they are shown exactly as typed.',
+      },
     },
     {
       name: 'excerpt',
