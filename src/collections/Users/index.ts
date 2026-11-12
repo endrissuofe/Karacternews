@@ -35,6 +35,13 @@ export const Users: CollectionConfig = {
     {
       name: 'bio',
       type: 'textarea',
+      // Bios are public: shown under the byline on every story and on the
+      // author page. Editors had put dates of birth here (Nov 2026).
+      admin: {
+        description:
+          'Public: shown under your name on every story and on your author page. One or two lines about your beat, e.g. "Reporter covering Delta State." Do not add personal details such as your date of birth or phone number.',
+      },
+      maxLength: 300,
     },
     {
       name: 'avatar',
