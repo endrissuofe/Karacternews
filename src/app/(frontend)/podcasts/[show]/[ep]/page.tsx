@@ -60,65 +60,63 @@ export default async function PodcastEpisodePage({ params: paramsPromise }: Args
 
   return (
     <main className="pb-16 pt-8">
-      <article className="container max-w-3xl">
-        <Link
-          href={`/podcasts/${show.slug}`}
-          className="font-mono text-[11px] font-semibold uppercase tracking-wider text-scarlet hover:underline"
-        >
-          {show.title}
-        </Link>
+      <article className="container">
+        {/* Reading column: see the note in article/[slug]/page.tsx. */}
+        <div className="mx-auto max-w-3xl">
+          <Link
+            href={`/podcasts/${show.slug}`}
+            className="font-mono text-[11px] font-semibold uppercase tracking-wider text-scarlet hover:underline"
+          >
+            {show.title}
+          </Link>
 
-        <h1 className="mb-3 mt-2 font-display text-[26px] font-bold leading-[1.1] text-foreground md:text-4xl">
-          {episode.title}
-        </h1>
+          <h1 className="mb-3 mt-2 font-display text-[26px] font-bold leading-[1.1] text-foreground md:text-4xl">
+            {episode.title}
+          </h1>
 
-        <p className="mb-5 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-          {episode.publishedAt && formatArticleDate(episode.publishedAt)}
-          {episode.duration ? (
-            <>
-              {' '}
-              &nbsp;·&nbsp; {Math.floor(episode.duration / 60)} min
-            </>
-          ) : null}
-        </p>
+          <p className="mb-5 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
+            {episode.publishedAt && formatArticleDate(episode.publishedAt)}
+            {episode.duration ? <> &nbsp;·&nbsp; {Math.floor(episode.duration / 60)} min</> : null}
+          </p>
 
-        <div className="mb-8 flex items-center gap-4">
-          {cover && (
-            <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-surface">
-              <Media fill imgClassName="object-cover" resource={cover} size="80px" />
+          <div className="mb-8 flex items-center gap-4">
+            {cover && (
+              <div className="relative aspect-square w-20 shrink-0 overflow-hidden rounded-lg bg-surface">
+                <Media fill imgClassName="object-cover" resource={cover} size="80px" />
+              </div>
+            )}
+            {audio?.url ? (
+              <PlayEpisodeButton
+                track={{
+                  src: audio.url,
+                  title: episode.title,
+                  showTitle: show.title,
+                  href: `/podcasts/${show.slug}/${episode.slug}`,
+                }}
+              />
+            ) : (
+              <p className="font-serif text-sm text-muted-foreground">Audio coming soon.</p>
+            )}
+          </div>
+
+          {(() => {
+            const videoId = getYouTubeId(episode.youtubeUrl)
+            return videoId ? (
+              <div className="mb-8">
+                <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  Watch on YouTube
+                </p>
+                <YouTubeEmbed videoId={videoId} title={episode.title} />
+              </div>
+            ) : null
+          })()}
+
+          {episode.showNotes && (
+            <div className="prose prose-sm max-w-none font-serif dark:prose-invert">
+              <RichText data={episode.showNotes} enableGutter={false} />
             </div>
-          )}
-          {audio?.url ? (
-            <PlayEpisodeButton
-              track={{
-                src: audio.url,
-                title: episode.title,
-                showTitle: show.title,
-                href: `/podcasts/${show.slug}/${episode.slug}`,
-              }}
-            />
-          ) : (
-            <p className="font-serif text-sm text-muted-foreground">Audio coming soon.</p>
           )}
         </div>
-
-        {(() => {
-          const videoId = getYouTubeId(episode.youtubeUrl)
-          return videoId ? (
-            <div className="mb-8">
-              <p className="mb-2 font-mono text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Watch on YouTube
-              </p>
-              <YouTubeEmbed videoId={videoId} title={episode.title} />
-            </div>
-          ) : null
-        })()}
-
-        {episode.showNotes && (
-          <div className="prose prose-sm max-w-none font-serif dark:prose-invert">
-            <RichText data={episode.showNotes} enableGutter={false} />
-          </div>
-        )}
       </article>
     </main>
   )
