@@ -1,12 +1,12 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { Media } from '@/components/Media'
 import { SectionHeading } from '@/components/SectionHeading'
 import { timeAgo } from '@/utilities/formatDateTime'
 
-import { StoryRow } from './StoryRow'
-import { coverOf, metaClass, stretchedLink, type StoryData } from './shared'
+import { StoryImage } from '@/components/story/StoryImage'
+import { StoryRow } from '@/components/story/StoryRow'
+import { coverOf, metaClass, stretchedLink, type StoryData } from '@/components/story/shared'
 
 // One section on the homepage: its newest story with a picture, then the
 // next few as headlines. The heading links to the full section page.
@@ -18,23 +18,16 @@ export const SectionBlock: React.FC<{
   const [first, ...rest] = stories
   if (!first) return null
 
-  const cover = coverOf(first)
-
   return (
     <section aria-label={name}>
       <SectionHeading href={`/category/${slug}`}>{name}</SectionHeading>
       <div className="grid gap-x-6 gap-y-5 sm:grid-cols-2">
         <article className="group relative">
-          {cover && (
-            <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-md bg-surface">
-              <Media
-                fill
-                imgClassName="object-cover"
-                resource={cover}
-                size="(max-width: 640px) 100vw, 25vw"
-              />
-            </div>
-          )}
+          <StoryImage
+            className="mb-3 aspect-[16/10]"
+            image={coverOf(first)}
+            size="(max-width: 640px) 100vw, 25vw"
+          />
           <h3 className="font-display text-xl font-semibold leading-snug text-foreground group-hover:underline">
             <Link className={stretchedLink} href={`/article/${first.slug}`}>
               {first.title}

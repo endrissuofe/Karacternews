@@ -237,6 +237,9 @@ export interface Page {
  */
 export interface Article {
   id: number;
+  /**
+   * Write headlines in normal capitalisation, not ALL CAPITALS — they are shown exactly as typed.
+   */
   title: string;
   /**
    * Short summary shown in listings and used as a fallback SEO description.

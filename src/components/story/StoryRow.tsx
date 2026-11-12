@@ -1,10 +1,10 @@
 import Link from 'next/link'
 import React from 'react'
 
-import { Media } from '@/components/Media'
 import { timeAgo } from '@/utilities/formatDateTime'
 import { cn } from '@/utilities/ui'
 
+import { StoryImage } from './StoryImage'
 import {
   categoryOf,
   coverOf,
@@ -66,14 +66,14 @@ export const StoryRow: React.FC<{
         {story.publishedAt && <p className={`mt-2 ${metaClass}`}>{timeAgo(story.publishedAt)}</p>}
       </div>
       {cover && (
-        <div
+        <StoryImage
           className={cn(
-            'relative shrink-0 self-start overflow-hidden rounded-md bg-surface',
+            'shrink-0 self-start',
             thumb === 'md' ? 'aspect-[4/3] w-28 sm:w-36' : 'aspect-square w-20',
           )}
-        >
-          <Media fill imgClassName="object-cover" resource={cover} size="144px" />
-        </div>
+          image={cover}
+          size="144px"
+        />
       )}
     </article>
   )

@@ -8,6 +8,7 @@ import React from 'react'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
 import type { CardPostData } from '@/components/Card'
+import { LeadStory } from '@/components/story/LeadStory'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
 const PAGE_SIZE = 12
@@ -50,6 +51,9 @@ export default async function CategoryPage({
     limit: PAGE_SIZE,
   })
 
+  const lead = page === 1 ? articles.docs[0] : undefined
+  const rest = lead ? articles.docs.slice(1) : articles.docs
+
   return (
     <main className="pb-16 pt-8">
       <div className="container mb-8">
@@ -61,9 +65,20 @@ export default async function CategoryPage({
         </p>
       </div>
 
-      {articles.docs.length > 0 ? (
-        <CollectionArchive posts={articles.docs as CardPostData[]} />
-      ) : (
+      {/* The first page opens with the section's newest story as its lead. */}
+      {lead && (
+        <div className="container mb-10">
+          <div className="border-b border-border pb-10">
+            <LeadStory headingLevel="h2" layout="split" showCategory={false} story={lead} />
+          </div>
+        </div>
+      )}
+
+      {rest.length > 0 && (
+        <CollectionArchive posts={rest as CardPostData[]} showCategories={false} />
+      )}
+
+      {articles.docs.length === 0 && (
         <div className="container">No articles in this category yet.</div>
       )}
 
