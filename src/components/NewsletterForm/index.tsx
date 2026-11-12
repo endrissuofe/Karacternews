@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useActionState } from 'react'
+import React, { useActionState, useId } from 'react'
 
 import { subscribeToNewsletter, type NewsletterState } from '@/actions/subscribeToNewsletter'
 
@@ -10,6 +10,9 @@ const initialState: NewsletterState = { status: 'idle' }
 // progressively enhanced, so the form still submits without JavaScript.
 export const NewsletterForm: React.FC = () => {
   const [state, formAction, pending] = useActionState(subscribeToNewsletter, initialState)
+  // The form appears twice on the homepage (rail and footer), so the label
+  // target must be unique per instance.
+  const emailId = useId()
 
   return (
     <div className="max-w-md">
@@ -35,11 +38,11 @@ export const NewsletterForm: React.FC = () => {
             aria-hidden="true"
             className="hidden"
           />
-          <label htmlFor="newsletter-email" className="sr-only">
+          <label htmlFor={emailId} className="sr-only">
             Email address
           </label>
           <input
-            id="newsletter-email"
+            id={emailId}
             name="email"
             type="email"
             required
@@ -54,7 +57,10 @@ export const NewsletterForm: React.FC = () => {
             {pending ? 'Signing up…' : 'Sign up'}
           </button>
           {state.status === 'error' && (
-            <p role="alert" className="w-full font-mono text-[11px] uppercase tracking-wider text-scarlet">
+            <p
+              role="alert"
+              className="w-full font-mono text-[11px] uppercase tracking-wider text-scarlet"
+            >
               {state.message}
             </p>
           )}
