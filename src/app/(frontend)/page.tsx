@@ -29,7 +29,7 @@ export const revalidate = 300
 export default async function HomePage() {
   const payload = await getPayload({ config: configPromise })
 
-  const [latest, trending, categories] = await Promise.all([
+  const [latest, trending] = await Promise.all([
     payload.find({
       collection: 'articles',
       overrideAccess: false,
@@ -58,12 +58,6 @@ export default async function HomePage() {
       sort: '-viewCount',
       select: { title: true, slug: true, viewCount: true },
       limit: 5,
-    }),
-    payload.find({
-      collection: 'categories',
-      overrideAccess: false,
-      sort: 'name',
-      limit: 50,
     }),
   ])
 
@@ -170,24 +164,6 @@ export default async function HomePage() {
             <SectionHeading>Latest</SectionHeading>
           </div>
           <CollectionArchive posts={restArticles as CardPostData[]} />
-        </section>
-      )}
-
-      {categories.docs.length > 0 && (
-        <section className="container mt-14">
-          <SectionHeading>Sections</SectionHeading>
-          <ul className="flex flex-wrap gap-2.5">
-            {categories.docs.map((category) => (
-              <li key={category.id}>
-                <Link
-                  className="inline-block rounded-full border border-border px-4 py-1.5 font-mono text-[11px] font-semibold uppercase tracking-wider text-foreground transition-colors hover:border-scarlet hover:text-scarlet motion-reduce:transition-none"
-                  href={`/category/${category.slug}`}
-                >
-                  {category.name}
-                </Link>
-              </li>
-            ))}
-          </ul>
         </section>
       )}
     </main>

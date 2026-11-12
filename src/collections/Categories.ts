@@ -4,6 +4,8 @@ import { anyone } from '../access/anyone'
 import { isEditorOrAdmin } from '../access/isEditorOrAdmin'
 import { slugField } from 'payload'
 
+import { revalidateSections, revalidateSectionsDelete } from './Categories/hooks/revalidateSections'
+
 // Note: the `parent` (self-relationship) and `breadcrumbs` fields are
 // added automatically by @payloadcms/plugin-nested-docs (see plugins/index.ts),
 // satisfying CLAUDE.md's "parent (self-rel, optional)" requirement without
@@ -30,4 +32,8 @@ export const Categories: CollectionConfig = {
       useAsSlug: 'name',
     }),
   ],
+  hooks: {
+    afterChange: [revalidateSections],
+    afterDelete: [revalidateSectionsDelete],
+  },
 }
